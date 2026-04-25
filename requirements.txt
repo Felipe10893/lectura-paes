@@ -2,3 +2,9 @@ streamlit
 google-generativeai
 plotly
 Pillow
+pandas
+pydantic
+pymongo[srv]
+dnspython
+python-dotenv
+certifi
