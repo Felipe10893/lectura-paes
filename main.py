@@ -748,15 +748,15 @@ elif st.session_state.menu_actual == 'Repositorio Admin':
         "ensayo_oficial":       ("📥 Oficial Subido",        "#FFF1F2", "#9F1239"),
     }
 
-    # Filtro: para prueba_gratis incluir también los archivados
+    # Filtro: para prueba_gratis incluir archivados; para ensayo_completo incluir docs sin campo tipo
     if repo_filtro == "prueba_gratis":
-        tipos_buscar = ["prueba_gratis", "prueba_gratis_archivo"]
+        query_repo = {"tipo": {"$in": ["prueba_gratis", "prueba_gratis_archivo"]}}
+    elif repo_filtro == "ensayo_completo":
+        query_repo = {"$or": [{"tipo": "ensayo_completo"}, {"tipo": {"$exists": False}}, {"tipo": None}]}
     else:
-        tipos_buscar = [repo_filtro]
+        query_repo = {"tipo": repo_filtro}
 
-    todos = list(st.session_state.ensayos_oficiales_col.find(
-        {"tipo": {"$in": tipos_buscar}}
-    ).sort([("fecha_generacion", -1), ("_id", -1)]))
+    todos = list(st.session_state.ensayos_oficiales_col.find(query_repo).sort([("fecha_generacion", -1), ("_id", -1)]))
 
     # Diagnóstico: mostrar total en colección
     total_col = st.session_state.ensayos_oficiales_col.count_documents({})
@@ -786,7 +786,7 @@ elif st.session_state.menu_actual == 'Repositorio Admin':
 
     for ej in todos:
         eid = str(ej["_id"])
-        tipo = ej.get("tipo", "")
+        tipo = ej.get("tipo") or "ensayo_completo"
         label, bg, color = TIPOS_LABEL.get(tipo, ("📄 Otro", "#F8FAFC", "#64748B"))
         titulo = ej.get("titulo", "Sin título")
         fecha = ej.get("fecha_generacion", None)
