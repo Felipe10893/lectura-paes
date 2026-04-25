@@ -119,14 +119,41 @@ if st.session_state.menu_actual in ['Home', 'Dashboard General']:
 # 🟢 PANTALLA 2: ENSAYOS DEMRE (SIMULADOR BIBLIOTECA OFICIAL)
 # ==============================================================================
 elif st.session_state.menu_actual == 'Ensayos DEMRE':
-    
+
+    st.markdown("""
+    <style>
+        #root [data-testid="stButton"] button {
+            height: auto !important; opacity: 1 !important; cursor: pointer !important;
+            padding: 10px 20px !important; margin: 0 !important;
+            background-color: var(--card-bg) !important; color: var(--text-color) !important;
+            border: 2px solid var(--card-border) !important; border-radius: 12px !important;
+            font-weight: 800 !important; transition: all 0.3s ease !important; min-height: 48px !important;
+        }
+        #root [data-testid="stButton"] button:hover {
+            border-color: #1F7AFF !important; color: #1F7AFF !important;
+            transform: translateY(-2px) !important; box-shadow: 0 4px 12px rgba(31,122,255,0.1) !important;
+        }
+        #root [data-testid="stButton"] button[kind="primary"] {
+            background-color: #1F7AFF !important; color: white !important; border-color: #1F7AFF !important;
+        }
+        #root [data-testid="stButton"] button[kind="primary"]:hover {
+            background-color: #005ce6 !important; border-color: #005ce6 !important; color: white !important;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown(ui.CSS_SPLIT_VIEW, unsafe_allow_html=True)
     st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
     col_back, _ = st.columns([1.5, 5])
     with col_back:
         if st.button("⬅️ VOLVER AL MENÚ", use_container_width=True):
             navegar_a('Home')
-            
-    # 🚀 INYECCIÓN ANTIGRAVITY: Llamamos al motor visual Premium
+
+    col_title, _ = st.columns([4, 1], gap="medium")
+    with col_title:
+        st.markdown("<h2 style='text-align: center; margin: 0; font-weight: 900; color: var(--text-color); font-size: 28px;'>🏛️ Simulador Oficial DEMRE</h2>", unsafe_allow_html=True)
+    st.markdown("<hr style='border-top: 1px dashed var(--card-border); margin: 20px 0;'>", unsafe_allow_html=True)
+
     ui.render_ensayos_demre()
 
 ## ==============================================================================
@@ -553,6 +580,239 @@ elif st.session_state.menu_actual == 'Modo Lectura':
 # ==============================================================================
 # 🟢 PANTALLAS SECUNDARIAS
 # ==============================================================================
+elif st.session_state.menu_actual == 'Prueba Gratis':
+    import random
+    st.markdown(ui.CSS_SPLIT_VIEW, unsafe_allow_html=True)
+
+    col_back, col_titulo = st.columns([1.5, 5])
+    with col_back:
+        if st.button("⬅️ VOLVER AL MENÚ", use_container_width=True):
+            st.session_state.pop("prueba_gratis_item", None)
+            st.session_state.pop("prueba_gratis_resps", None)
+            st.session_state.pop("prueba_gratis_record", None)
+            st.session_state.pop("prueba_gratis_fase", None)
+            navegar_a('Home')
+    with col_titulo:
+        st.markdown("<h2 style='margin:0; font-weight:900; color:var(--text-color);'>Prueba GRATIS</h2>", unsafe_allow_html=True)
+        st.markdown("<p style='color:#64748B; margin:4px 0 0 0;'>Un texto corto del Banco Express. Sin registro. Resultado inmediato.</p>", unsafe_allow_html=True)
+
+    st.markdown("<hr style='border-top:1px dashed var(--card-border); margin:16px 0;'>", unsafe_allow_html=True)
+
+    fase_pg = st.session_state.get("prueba_gratis_fase", "rendir")
+
+    # Cargar el ejercicio activo de Prueba Gratis (solo una vez por sesión)
+    if "prueba_gratis_item" not in st.session_state:
+        if st.session_state.get("db_conectada", False):
+            doc = st.session_state.ensayos_oficiales_col.find_one({"tipo": "prueba_gratis"})
+            if doc:
+                texto_key = list(doc.get("textos", {}).keys())[0] if doc.get("textos") else "1"
+                texto_data_doc = doc.get("textos", {}).get(texto_key, {})
+                preguntas_doc = [p for p in doc.get("preguntas", []) if str(p.get("texto_id")) == str(texto_key)]
+                if not preguntas_doc:
+                    preguntas_doc = doc.get("preguntas", [])
+                st.session_state.prueba_gratis_item = {
+                    "ensayo_id": str(doc["_id"]), "texto_id": texto_key,
+                    "texto_data": texto_data_doc, "preguntas": preguntas_doc
+                }
+                st.session_state.prueba_gratis_resps = {}
+                st.session_state.prueba_gratis_fase = "rendir"
+            else:
+                st.info("El administrador aún no ha publicado ningún ejercicio para Prueba Gratis.")
+                st.stop()
+        else:
+            st.warning("Sin conexión a la base de datos.")
+            st.stop()
+
+    item = st.session_state.prueba_gratis_item
+    texto_data = item["texto_data"]
+    preguntas = item["preguntas"]
+
+    if fase_pg == "rendir":
+        c_text, c_preg = st.columns([1.2, 1], gap="large")
+        with c_text:
+            st.markdown(f"<h3 style='margin-bottom:16px;'>{texto_data.get('titulo', 'Texto')}</h3>", unsafe_allow_html=True)
+            st.markdown(f"<div class='scrollable-text-panel'>{texto_data.get('contenido', '')}</div>", unsafe_allow_html=True)
+        with c_preg:
+            st.markdown(f"#### Preguntas ({len(preguntas)})")
+            st.markdown("<p style='font-size:13px;color:#64748B;'>Responde todas y presiona evaluar.</p>", unsafe_allow_html=True)
+            for i, p in enumerate(preguntas):
+                pid = p["id"]
+                with st.container(border=True):
+                    st.markdown(f"**{i+1}. {p['enunciado']}**")
+                    saved = st.session_state.prueba_gratis_resps.get(pid)
+                    idx = p["opciones"].index(saved) if saved in p.get("opciones", []) else None
+                    resp = st.radio(f"Op{i+1}", p["opciones"], index=idx, key=f"pg_radio_{pid}", label_visibility="collapsed")
+                    if resp:
+                        st.session_state.prueba_gratis_resps[pid] = resp
+            st.markdown("<br>", unsafe_allow_html=True)
+            if st.button("✅ VER MI RESULTADO", type="primary", use_container_width=True):
+                correctas = 0
+                for p in preguntas:
+                    pid = p["id"]
+                    r_user = st.session_state.prueba_gratis_resps.get(pid)
+                    r_idx = p.get("correcta", 0)
+                    if isinstance(r_idx, int) and r_idx < len(p["opciones"]):
+                        if r_user == p["opciones"][r_idx]:
+                            correctas += 1
+                total = len(preguntas)
+                nota = round(((correctas / total) * 6.0) + 1.0, 1) if total > 0 else 1.0
+                st.session_state.prueba_gratis_record = {
+                    "puntaje": correctas, "total": total, "nota": nota,
+                    "preguntas": preguntas, "resps": st.session_state.prueba_gratis_resps
+                }
+                st.session_state.prueba_gratis_fase = "resultado"
+                st.rerun()
+
+    elif fase_pg == "resultado":
+        rec = st.session_state.prueba_gratis_record
+        puntaje, total, nota = rec["puntaje"], rec["total"], rec["nota"]
+        precision = int((puntaje / total) * 100) if total > 0 else 0
+
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Correctas", f"{puntaje} / {total}")
+        c2.metric("Nota", nota)
+        c3.metric("Precisión", f"{precision}%")
+
+        if puntaje == total:
+            st.balloons()
+            st.success("¡Puntaje perfecto! Excelente rendimiento.")
+        elif precision >= 60:
+            st.info("Buen intento. Sigue practicando para subir tu puntaje.")
+        else:
+            st.error("Necesitas reforzar. Revisa las explicaciones abajo.")
+
+        st.markdown("<hr style='margin:16px 0;'>", unsafe_allow_html=True)
+        st.markdown("### Revisión")
+        for i, p in enumerate(rec["preguntas"]):
+            pid = p["id"]
+            r_user = rec["resps"].get(pid)
+            r_idx = p.get("correcta", 0)
+            r_correcta = p["opciones"][r_idx] if isinstance(r_idx, int) and r_idx < len(p["opciones"]) else "N/A"
+            es_ok = (r_user == r_correcta)
+            icono = "✅" if es_ok else "❌"
+            with st.expander(f"{icono} Pregunta {i+1}: {p['enunciado'][:60]}..."):
+                st.markdown(f"**Tu respuesta:** {r_user or 'Sin responder'}")
+                if not es_ok:
+                    st.markdown(f"**Correcta:** {r_correcta}")
+                st.info(f"**Explicación:** {p.get('explicacion', 'No disponible.')}")
+
+        st.markdown("<br>", unsafe_allow_html=True)
+        col_a, col_b = st.columns(2)
+        with col_a:
+            if st.button("🔄 Reintentar este ejercicio", use_container_width=True):
+                st.session_state.pop("prueba_gratis_resps", None)
+                st.session_state.pop("prueba_gratis_record", None)
+                st.session_state.prueba_gratis_fase = "rendir"
+                st.rerun()
+        with col_b:
+            if st.button("🚀 Ir a Modo Lectura completo", type="primary", use_container_width=True):
+                navegar_a('Modo Lectura')
+
+elif st.session_state.menu_actual == 'Repositorio Admin':
+    # Verificar acceso admin
+    if not st.session_state.get('admin_autenticado', False):
+        st.warning("Acceso restringido. Ingresa desde el panel de Configuración con tu clave de administrador.")
+        if st.button("⬅️ Volver"):
+            navegar_a('Nivel de Dificultad')
+        st.stop()
+
+    repo_filtro = st.session_state.get("repo_filtro", "ensayo_completo")
+
+    TITULOS_REPO = {
+        "ensayo_completo": ("🏛️ Repositorio — Ensayos Completos (65 p. IA)",   "Ensayos oficiales DEMRE generados con IA."),
+        "banco_express":   ("⚡ Repositorio — Banco de Textos Express",          "Lotes de textos cortos para práctica rápida."),
+        "prueba_gratis":   ("🎁 Repositorio — Prueba Gratis",                    "Ejercicios publicados en la Prueba Gratis (activo y archivados)."),
+        "ensayo_oficial":  ("📥 Repositorio — Ensayos Oficiales Subidos",        "Ensayos DEMRE reales cargados manualmente."),
+    }
+    titulo_repo, desc_repo = TITULOS_REPO.get(repo_filtro, ("📊 Repositorio", ""))
+
+    col_back, col_titulo = st.columns([1.5, 5])
+    with col_back:
+        if st.button("⬅️ VOLVER", use_container_width=True):
+            navegar_a('Nivel de Dificultad')
+    with col_titulo:
+        st.markdown(f"## {titulo_repo}")
+        st.markdown(f"<p style='color:#64748B;'>{desc_repo} Ordenados por fecha de creación con estadísticas de participación.</p>", unsafe_allow_html=True)
+
+    st.markdown("<hr style='border-top:1px dashed var(--card-border); margin:16px 0;'>", unsafe_allow_html=True)
+
+    if not st.session_state.get('db_conectada', False):
+        st.warning("Sin conexión a la base de datos.")
+        st.stop()
+
+    TIPOS_LABEL = {
+        "ensayo_completo":      ("🏛️ Ensayo Completo IA",  "#F0FDF4", "#166534"),
+        "banco_express":        ("⚡ Banco Express",         "#FFFBEB", "#B45309"),
+        "prueba_gratis":        ("🎁 Prueba Gratis",         "#EFF6FF", "#1D4ED8"),
+        "prueba_gratis_archivo":("🗄️ Archivado",            "#F8FAFC", "#64748B"),
+        "ensayo_oficial":       ("📥 Oficial Subido",        "#FFF1F2", "#9F1239"),
+    }
+
+    # Filtro: para prueba_gratis incluir también los archivados
+    if repo_filtro == "prueba_gratis":
+        tipos_buscar = ["prueba_gratis", "prueba_gratis_archivo"]
+    else:
+        tipos_buscar = [repo_filtro]
+
+    todos = list(st.session_state.ensayos_oficiales_col.find(
+        {"tipo": {"$in": tipos_buscar}}
+    ).sort([("fecha_generacion", -1), ("_id", -1)]))
+
+    # Diagnóstico: mostrar total en colección
+    total_col = st.session_state.ensayos_oficiales_col.count_documents({})
+    total_tipo = len(todos)
+    st.caption(f"📦 Encontrados: **{total_tipo}** ejercicios de este tipo | Total en base de datos: {total_col}")
+
+    if not todos:
+        st.warning(f"No hay ejercicios de tipo **{repo_filtro}** en la base de datos.")
+        # Mostrar todos los tipos disponibles para diagnosticar
+        pipeline = [{"$group": {"_id": "$tipo", "count": {"$sum": 1}}}]
+        tipos_existentes = list(st.session_state.ensayos_oficiales_col.aggregate(pipeline))
+        if tipos_existentes:
+            st.markdown("**Tipos disponibles en la base de datos:**")
+            for t in tipos_existentes:
+                st.markdown(f"- `{t['_id']}`: {t['count']} documentos")
+        st.stop()
+
+    # Obtener estadísticas de completaciones desde historial
+    historial_all = list(st.session_state.ensayos_col.find({}, {"ensayo_id": 1, "usuario": 1}))
+    completaciones = {}
+    usuarios_por_ej = {}
+    for h in historial_all:
+        eid = str(h.get("ensayo_id", ""))
+        usr = h.get("usuario", "")
+        completaciones[eid] = completaciones.get(eid, 0) + 1
+        usuarios_por_ej.setdefault(eid, set()).add(usr)
+
+    for ej in todos:
+        eid = str(ej["_id"])
+        tipo = ej.get("tipo", "")
+        label, bg, color = TIPOS_LABEL.get(tipo, ("📄 Otro", "#F8FAFC", "#64748B"))
+        titulo = ej.get("titulo", "Sin título")
+        fecha = ej.get("fecha_generacion", None)
+        fecha_str = fecha.strftime("%d/%m/%Y %H:%M") if hasattr(fecha, "strftime") else "—"
+        num_pregs = len(ej.get("preguntas", []))
+        total_intentos = completaciones.get(eid, 0)
+        usuarios_unicos = len(usuarios_por_ej.get(eid, set()))
+
+        with st.container():
+            st.markdown(f"""
+            <div style="background:{bg}; border-radius:12px; padding:16px 20px; margin-bottom:12px; border:1px solid rgba(0,0,0,0.06);">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
+                    <div>
+                        <span style="background:rgba(0,0,0,0.06); color:{color}; font-size:10px; font-weight:900; padding:3px 8px; border-radius:20px; letter-spacing:0.5px;">{label}</span>
+                        <h4 style="margin:8px 0 4px 0; color:var(--text-color); font-size:15px; font-weight:800;">{titulo}</h4>
+                        <span style="font-size:12px; color:#64748B;">📅 {fecha_str} &nbsp;·&nbsp; 📝 {num_pregs} preguntas</span>
+                    </div>
+                    <div style="text-align:right; min-width:160px;">
+                        <div style="font-size:28px; font-weight:900; color:{color}; line-height:1.1;">{usuarios_unicos}</div>
+                        <div style="font-size:11px; color:#64748B; text-transform:uppercase; letter-spacing:0.5px;">suscriptores realizaron</div>
+                        <div style="font-size:12px; color:#94A3B8; margin-top:2px;">{total_intentos} intentos totales</div>
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
 elif st.session_state.menu_actual == 'Mi Historial':
     @st.dialog("📋 REVISIÓN DETALLADA", width="large")
     def mostrar_detalle(datos):
@@ -670,18 +930,18 @@ elif st.session_state.menu_actual == 'Nivel de Dificultad':
         st.success("✅ Acceso Concedido: Privilegios de Administrador Activados")
         
         # ---------------------------------------------------------
-        # GENERADORES SEPARADOS: ENSAYO COMPLETO VS BANCO EXPRESS
+        # GENERADORES SEPARADOS: ENSAYO COMPLETO / BANCO EXPRESS / TEXTO DEMRE
         # ---------------------------------------------------------
-        col_adm1, col_admin2 = st.columns(2)
-        
+        col_adm1, col_admin2, col_admin3, col_admin4 = st.columns(4)
+
         with col_adm1:
             st.markdown("""
-            <div style="background: #F0FDF4; border: 1px solid #86EFAC; border-radius: 12px; padding: 20px; margin-bottom: 20px; height: 130px;">
-                <h4 style="margin-top: 0; color: #166534;">🏛️ Generar Ensayo Completo</h4>
-                <p style="font-size: 13px; color: #15803D; margin-bottom: 0;">Genera un simulacro oficial (65 preguntas) para la biblioteca principal.</p>
+            <div style="background: #F0FDF4; border: 1px solid #86EFAC; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; min-height: 90px;">
+                <h4 style="margin-top: 0; color: #166534; font-size: 14px;">🏛️ Ensayo Completo</h4>
+                <p style="font-size: 12px; color: #15803D; margin-bottom: 0; line-height: 1.4;">Simulacro oficial (65 preguntas) para la biblioteca principal.</p>
             </div>
             """, unsafe_allow_html=True)
-            
+
             if st.button("🚀 GENERAR ENSAYO 65 P", type="primary", use_container_width=True):
                 with st.status("🧠 Procesando Matriz 2027... (Tomará bastante tiempo)", expanded=True) as status:
                     try:
@@ -782,12 +1042,17 @@ FIN DE LA INSTRUCCIÓN
                         else:
                             st.error("🚨 La IA no devolvió un JSON válido. Intenta nuevamente.")
                     except Exception as e: st.error(f"🚨 Error Gemini: {e}")
+            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+            if st.button("📊 Ver Repositorio →", key="repo_adm1", use_container_width=True):
+                st.session_state.admin_autenticado = True
+                st.session_state.repo_filtro = "ensayo_completo"
+                navegar_a('Repositorio Admin')
 
         with col_admin2:
             st.markdown("""
-            <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 12px; padding: 20px; margin-bottom: 20px; height: 130px;">
-                <h4 style="margin-top: 0; color: #B45309;">⚡ Generar Lote Express</h4>
-                <p style="font-size: 13px; color: #92400E; margin-bottom: 0;">Genera textos cortos aislados para la Biblioteca de Práctica Express.</p>
+            <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; min-height: 90px;">
+                <h4 style="margin-top: 0; color: #B45309; font-size: 14px;">⚡ Lote Express</h4>
+                <p style="font-size: 12px; color: #92400E; margin-bottom: 0; line-height: 1.4;">Textos cortos para la Biblioteca de Práctica Express.</p>
             </div>
             """, unsafe_allow_html=True)
             
@@ -836,39 +1101,250 @@ FIN DE LA INSTRUCCIÓN
                         else:
                             st.error("🚨 La IA no devolvió un JSON válido. Intenta nuevamente.")
                     except Exception as e: st.error(f"🚨 Error Gemini: {e}")
+            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+            if st.button("📊 Ver Repositorio →", key="repo_adm2", use_container_width=True):
+                st.session_state.admin_autenticado = True
+                st.session_state.repo_filtro = "banco_express"
+                navegar_a('Repositorio Admin')
+
+        with col_admin3:
+            st.markdown("""
+            <div style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; min-height: 90px;">
+                <h4 style="margin-top: 0; color: #1D4ED8; font-size: 14px;">📄 Texto DEMRE + 9 preg.</h4>
+                <p style="font-size: 12px; color: #1E40AF; margin-bottom: 0; line-height: 1.4;">1 texto (900-1100 palabras) al promedio DEMRE.</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+            if st.button("📄 GENERAR TEXTO DEMRE", type="primary", use_container_width=True):
+                with st.status("🧠 Generando texto DEMRE y 9 preguntas... (~25 seg)", expanded=True) as status:
+                    try:
+                        INSTRUCCIONES_TEXTO_DEMRE = f"""
+INSTRUCCIÓN: MOTOR DE GENERACIÓN PAES — TEXTO ÚNICO ESTILO DEMRE V1.0
+
+OBJETIVO:
+Generar UN SOLO texto de alta calidad estilo DEMRE con 9 preguntas alineadas a la Matriz 2027.
+Este texto va al Banco Express para práctica individual enfocada.
+
+ESPECIFICACIONES DEL TEXTO:
+- Extensión: 900 a 1.100 palabras exactas.
+- Tipo: No literario (expositivo o argumentativo) O literario (narrativo). Alterna aleatoriamente.
+- Tema: Selecciona un tema relevante, actual y atractivo para estudiantes chilenos de 4to medio.
+- Calidad: Nivel de complejidad DEMRE real. Vocabulario variado. Párrafos bien estructurados.
+
+ESPECIFICACIONES DE LAS 9 PREGUNTAS:
+Distribución obligatoria (refleja la proporción DEMRE por texto mediano):
+- Localizar (25%): 2 preguntas → tareas: extraer info explícita, identificar paráfrasis.
+- Interpretar (50%): 5 preguntas → tareas: inferencias, tema central, síntesis, relaciones, vocabulario contextual.
+- Evaluar (25%): 2 preguntas → tareas: intención comunicativa, perspectiva del autor, recursos.
+
+REGLAS DE ORO:
+- Cada pregunta tiene UNA SOLA respuesta correcta indiscutible con respaldo textual.
+- Los distractores deben ser plausibles pero claramente incorrectos para quien leyó bien.
+- El campo "correcta" es un NÚMERO ENTERO (0=A, 1=B, 2=C, 3=D).
+- La explicación debe indicar: HABILIDAD, TAREA y JUSTIFICACIÓN con cita textual.
+
+FORMATO JSON OBLIGATORIO (responde SOLO con el JSON, sin markdown):
+{{
+  "titulo": "Texto DEMRE: [Titulo del texto]",
+  "tipo": "banco_express",
+  "textos": {{
+    "1": {{
+      "titulo": "[Titulo descriptivo del texto]",
+      "contenido": "Párrafos separados con <br><br>. No uses saltos de línea simples."
+    }}
+  }},
+  "preguntas": [
+    {{
+      "id": 1,
+      "texto_id": "1",
+      "enunciado": "¿...?",
+      "opciones": ["A) ...", "B) ...", "C) ...", "D) ..."],
+      "correcta": 2,
+      "explicacion": "HABILIDAD: Localizar | TAREA: Extraer información explícita | JUSTIFICACIÓN: El texto señala literalmente que '...'"
+    }},
+    {{ "id": 2, "texto_id": "1", "enunciado": "...", "opciones": ["A) ...","B) ...","C) ...","D) ..."], "correcta": 0, "explicacion": "HABILIDAD: Interpretar | TAREA: ... | JUSTIFICACIÓN: ..." }},
+    {{ "id": 3, "texto_id": "1", "enunciado": "...", "opciones": ["A) ...","B) ...","C) ...","D) ..."], "correcta": 1, "explicacion": "..." }},
+    {{ "id": 4, "texto_id": "1", "enunciado": "...", "opciones": ["A) ...","B) ...","C) ...","D) ..."], "correcta": 2, "explicacion": "..." }},
+    {{ "id": 5, "texto_id": "1", "enunciado": "...", "opciones": ["A) ...","B) ...","C) ...","D) ..."], "correcta": 3, "explicacion": "..." }},
+    {{ "id": 6, "texto_id": "1", "enunciado": "...", "opciones": ["A) ...","B) ...","C) ...","D) ..."], "correcta": 0, "explicacion": "..." }},
+    {{ "id": 7, "texto_id": "1", "enunciado": "...", "opciones": ["A) ...","B) ...","C) ...","D) ..."], "correcta": 1, "explicacion": "HABILIDAD: Evaluar | TAREA: ... | JUSTIFICACIÓN: ..." }},
+    {{ "id": 8, "texto_id": "1", "enunciado": "...", "opciones": ["A) ...","B) ...","C) ...","D) ..."], "correcta": 2, "explicacion": "..." }},
+    {{ "id": 9, "texto_id": "1", "enunciado": "...", "opciones": ["A) ...","B) ...","C) ...","D) ..."], "correcta": 0, "explicacion": "HABILIDAD: Evaluar | TAREA: ... | JUSTIFICACIÓN: ..." }}
+  ]
+}}
+FIN DE LA INSTRUCCIÓN
+"""
+                        response = llamar_gemini(INSTRUCCIONES_TEXTO_DEMRE, st.session_state.api_key, status)
+                        datos_texto = parsear_json_respuesta(response.text) if response else None
+                        if datos_texto:
+                            datos_texto['tipo'] = 'prueba_gratis'
+                            datos_texto['fecha_generacion'] = datetime.now()
+                            if st.session_state.get('db_conectada'):
+                                # Archivar el ejercicio activo anterior
+                                st.session_state.ensayos_oficiales_col.update_many(
+                                    {"tipo": "prueba_gratis"},
+                                    {"$set": {"tipo": "prueba_gratis_archivo"}}
+                                )
+                                st.session_state.ensayos_oficiales_col.insert_one(datos_texto)
+                            status.update(label="✅ Ejercicio publicado en Prueba Gratis", state="complete")
+                            st.balloons()
+                        else:
+                            st.error("🚨 La IA no devolvió un JSON válido. Intenta nuevamente.")
+                    except Exception as e: st.error(f"🚨 Error Gemini: {e}")
+            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+            if st.button("📊 Ver Repositorio →", key="repo_adm3", use_container_width=True):
+                st.session_state.admin_autenticado = True
+                st.session_state.repo_filtro = "prueba_gratis"
+                navegar_a('Repositorio Admin')
+
+        with col_admin4:
+            st.markdown("""
+            <div style="background: #FFF1F2; border: 1px solid #FECDD3; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; min-height: 90px;">
+                <h4 style="margin-top: 0; color: #9F1239; font-size: 14px;">📥 Subir Ensayos Oficiales</h4>
+                <p style="font-size: 12px; color: #BE123C; margin-bottom: 0; line-height: 1.4;">Carga JSON con ensayos DEMRE reales preparados externamente.</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+            if st.button("📥 SUBIR ENSAYO OFICIAL", type="primary", use_container_width=True, key="btn_abrir_uploader"):
+                st.session_state.mostrar_uploader_oficial = not st.session_state.get("mostrar_uploader_oficial", False)
+
+            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+            if st.button("📊 Ver Repositorio →", key="repo_adm4", use_container_width=True):
+                st.session_state.admin_autenticado = True
+                st.session_state.repo_filtro = "ensayo_oficial"
+                navegar_a('Repositorio Admin')
+
+        # ---------------------------------------------------------
+        # UPLOADER DESPLEGABLE — ENSAYOS OFICIALES
+        # ---------------------------------------------------------
+        if st.session_state.get("mostrar_uploader_oficial", False):
+            with st.container(border=True):
+                st.markdown("#### 📥 Cargar Ensayo Oficial (JSON o PDF)")
+                st.markdown("<p style='color:#64748B; font-size:13px; margin-bottom:12px;'>Puedes subir un <b>JSON</b> ya estructurado o un <b>PDF</b> del ensayo DEMRE real — la IA lo leerá y convertirá automáticamente.</p>", unsafe_allow_html=True)
+                archivo_oficial = st.file_uploader("Selecciona el archivo", type=["json", "pdf"], key="uploader_oficial")
+
+                if archivo_oficial is not None:
+                    ext = archivo_oficial.name.lower().split(".")[-1]
+
+                    if ext == "json":
+                        try:
+                            datos_oficial = json.load(archivo_oficial)
+                            if "titulo" in datos_oficial and "preguntas" in datos_oficial:
+                                num_p = len(datos_oficial.get("preguntas", []))
+                                st.info(f"📄 **{datos_oficial['titulo']}** — {num_p} preguntas detectadas")
+                                if st.button("✅ CONFIRMAR SUBIDA", type="primary", use_container_width=True, key="btn_confirmar_oficial"):
+                                    datos_oficial['tipo'] = 'ensayo_oficial'
+                                    datos_oficial['fecha_generacion'] = datetime.now()
+                                    if st.session_state.get('db_conectada'):
+                                        st.session_state.ensayos_oficiales_col.insert_one(datos_oficial)
+                                        st.success("✅ Ensayo oficial subido correctamente.")
+                                        st.session_state.mostrar_uploader_oficial = False
+                                        st.balloons()
+                                    else:
+                                        st.error("Sin conexión a la base de datos.")
+                            else:
+                                st.error("El JSON no tiene el formato correcto (faltan 'titulo' o 'preguntas').")
+                        except Exception as e:
+                            st.error(f"Error al leer el JSON: {e}")
+
+                    elif ext == "pdf":
+                        st.info(f"📄 PDF detectado: **{archivo_oficial.name}** ({round(archivo_oficial.size/1024/1024, 1)} MB) — La IA extraerá y estructurará las preguntas automáticamente.")
+                        if st.button("🧠 PROCESAR PDF CON IA", type="primary", use_container_width=True, key="btn_procesar_pdf"):
+                            with st.status("Extrayendo texto del PDF...", expanded=True) as status:
+                                try:
+                                    import pdfplumber, io
+                                    pdf_bytes = archivo_oficial.read()
+                                    texto_pdf = ""
+                                    with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
+                                        for page in pdf.pages:
+                                            texto_pdf += (page.extract_text() or "") + "\n"
+
+                                    if len(texto_pdf.strip()) < 200:
+                                        st.error("No se pudo extraer texto del PDF. Puede ser un PDF de imágenes escaneadas.")
+                                        st.stop()
+
+                                    status.update(label="Texto extraído. Enviando a Gemini para estructurar...")
+
+                                    PROMPT_PDF = f"""
+Eres un experto en la prueba PAES DEMRE de Chile. Se te entrega el texto extraído de un ensayo oficial DEMRE.
+Tu tarea es estructurarlo en el formato JSON exacto que usa nuestra app.
+
+REGLAS:
+- El campo "correcta" debe ser un NÚMERO ENTERO: 0=A, 1=B, 2=C, 3=D.
+- El campo "texto_id" debe ser el número del texto al que pertenece la pregunta (como string: "1", "2", etc.).
+- Agrupa las preguntas por texto. Cada texto va en "textos" con su título y contenido.
+- Si el texto es largo, inclúyelo completo en "contenido", usando <br><br> como salto de párrafo.
+- NO inventes preguntas. Usa SOLO las que están en el PDF.
+
+FORMATO JSON OBLIGATORIO (solo el JSON, sin markdown):
+{{
+  "titulo": "PAES Oficial [año detectado]",
+  "tipo": "ensayo_oficial",
+  "tiempo_limite": "02:30:00",
+  "textos": {{
+    "1": {{ "titulo": "Título del texto 1", "contenido": "..." }},
+    "2": {{ "titulo": "Título del texto 2", "contenido": "..." }}
+  }},
+  "preguntas": [
+    {{
+      "id": 1,
+      "texto_id": "1",
+      "enunciado": "¿...?",
+      "opciones": ["A) ...", "B) ...", "C) ...", "D) ..."],
+      "correcta": 2,
+      "explicacion": "Respuesta correcta según clave oficial."
+    }}
+  ]
+}}
+
+TEXTO DEL PDF (primeros 60.000 caracteres):
+{texto_pdf[:60000]}
+"""
+                                    status.update(label="Gemini procesando el ensayo... (~60 seg)")
+                                    response = llamar_gemini(PROMPT_PDF, st.session_state.api_key, status)
+                                    datos_oficial = parsear_json_respuesta(response.text) if response else None
+
+                                    if datos_oficial and "preguntas" in datos_oficial:
+                                        datos_oficial['tipo'] = 'ensayo_oficial'
+                                        datos_oficial['fecha_generacion'] = datetime.now()
+                                        if st.session_state.get('db_conectada'):
+                                            st.session_state.ensayos_oficiales_col.insert_one(datos_oficial)
+                                        status.update(label=f"✅ Ensayo estructurado y guardado — {len(datos_oficial['preguntas'])} preguntas", state="complete")
+                                        st.session_state.mostrar_uploader_oficial = False
+                                        st.balloons()
+                                    else:
+                                        st.error("Gemini no pudo estructurar el PDF. Intenta con un PDF de mejor calidad o sube el JSON directamente.")
+                                except Exception as e:
+                                    st.error(f"Error procesando el PDF: {e}")
 
         # ---------------------------------------------------------
         # INYECCIÓN MANUAL MEDIANTE ARCHIVO
         # ---------------------------------------------------------
-        st.markdown("<hr style='border-top: 1px dashed var(--card-border);'>", unsafe_allow_html=True)
-        st.markdown("<h4 style='color: #64748B;'>📂 Cargar Archivo Manual (Backup)</h4>", unsafe_allow_html=True)
-        
-        destino_manual = st.selectbox("Destino del Archivo JSON:", ["Ensayo Completo", "Banco Express"])
-        archivo_json = st.file_uploader("Sube el archivo .json generado externamente", type=["json"])
-        
-        if archivo_json is not None:
-            try:
-                datos_ensayo = json.load(archivo_json)
-                if "titulo" in datos_ensayo and "preguntas" in datos_ensayo:
-                    st.info(f"📄 Archivo detectado: **{datos_ensayo['titulo']}** ({len(datos_ensayo['preguntas'])} preguntas)")
-                    
-                    if st.button("⚡ INYECTAR MANUALMENTE", type="primary"):
-                        # Etiquetar el archivo según la selección del administrador
-                        if destino_manual == "Ensayo Completo":
-                            datos_ensayo['tipo'] = 'ensayo_completo'
-                        else:
-                            datos_ensayo['tipo'] = 'banco_express'
-                            
-                        if st.session_state.get('db_conectada'):
-                            st.session_state.ensayos_oficiales_col.insert_one(datos_ensayo)
-                            st.balloons()
-                            st.success("🚀 ¡Inyectado exitosamente en MongoDB! Ya está en vivo.")
-                        else:
-                            st.error("❌ No hay conexión a la Base de Datos.")
-                else:
-                    st.error("❌ El archivo JSON no tiene el formato estructural correcto.")
-            except Exception as e:
-                st.error(f"❌ Error al leer el archivo JSON: {e}")
+        st.markdown("<hr style='border-top: 1px dashed var(--card-border); margin: 24px 0;'>", unsafe_allow_html=True)
+        with st.container(border=True):
+            st.markdown("<h4 style='color: #64748B; margin-top: 0;'>📂 Cargar Archivo Manual (Backup)</h4>", unsafe_allow_html=True)
+            destino_manual = st.selectbox("Destino del Archivo JSON:", ["Ensayo Completo", "Banco Express"])
+            archivo_json = st.file_uploader("Sube el archivo .json generado externamente", type=["json"])
+            if archivo_json is not None:
+                try:
+                    datos_ensayo = json.load(archivo_json)
+                    if "titulo" in datos_ensayo and "preguntas" in datos_ensayo:
+                        st.info(f"📄 Archivo detectado: **{datos_ensayo['titulo']}** ({len(datos_ensayo['preguntas'])} preguntas)")
+                        if st.button("⚡ INYECTAR MANUALMENTE", type="primary"):
+                            if destino_manual == "Ensayo Completo":
+                                datos_ensayo['tipo'] = 'ensayo_completo'
+                            else:
+                                datos_ensayo['tipo'] = 'banco_express'
+                            if st.session_state.get('db_conectada'):
+                                st.session_state.ensayos_oficiales_col.insert_one(datos_ensayo)
+                                st.balloons()
+                                st.success("✅ ¡Inyectado exitosamente en MongoDB! Ya está en vivo.")
+                            else:
+                                st.error("Sin conexión a la Base de Datos.")
+                    else:
+                        st.error("El archivo JSON no tiene el formato estructural correcto.")
+                except Exception as e:
+                    st.error(f"Error al leer el archivo JSON: {e}")
 
 # --- FIN DE CODIGO ---
 # --- main.py ---

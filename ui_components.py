@@ -670,6 +670,8 @@ def render_interfaz_principal():
         ("__NAV__Mi Progreso",         "nav_prog",   "Mi Progreso"),
         ("__NAV__Mis Descargas",       "nav_desc",   "Mis Descargas"),
         ("__NAV__Nivel de Dificultad", "nav_conf",   "Nivel de Dificultad"),
+        ("__NAV__Prueba Gratis",       "nav_prueba",  "Prueba Gratis"),
+        ("__NAV__Repositorio Admin",   "nav_repo",    "Repositorio Admin"),
     ]
     for label, key, destino in NAV_MAP:
         if st.button(label, key=key):
@@ -710,7 +712,8 @@ def render_interfaz_principal():
     'Mi Progreso':        'Mi Progreso',
     'Desafios':           'Mis Descargas',
     'Perfil':             'Nivel de Dificultad',
-    'Configuracion':      'Nivel de Dificultad'
+    'Configuracion':      'Nivel de Dificultad',
+    'Prueba Gratis':      'Prueba Gratis'
   };
 
   function hideProxyBtns() {
@@ -789,16 +792,8 @@ def render_ensayos_demre():
     # ----------------------------------------------------------------
     if fase == "configuracion":
         st.markdown(
-            "<div style='background:rgba(99,102,241,0.1);color:#6366F1;padding:4px 12px;"
-            "border-radius:20px;font-size:11px;font-weight:800;display:inline-block;"
-            "margin-bottom:10px;border:1px solid rgba(99,102,241,0.3);'>"
-            "📜 SIMULADOR OFICIAL DEMRE</div>",
-            unsafe_allow_html=True,
-        )
-        st.markdown("## Biblioteca de Ensayos DEMRE")
-        st.markdown(
-            "<p style='color:#64748B;'>Selecciona un ensayo oficial para simular "
-            "las condiciones reales de la PAES. Cada ensayo tiene 65 preguntas.</p>",
+            "<h4 style='color: #64748B; margin-bottom: 20px; font-weight: 600;'>"
+            "Selecciona un ensayo para comenzar tu entrenamiento:</h4>",
             unsafe_allow_html=True,
         )
 
@@ -807,30 +802,40 @@ def render_ensayos_demre():
             return
 
         ensayos = list(
-            st.session_state.ensayos_oficiales_col.find({"tipo": "ensayo_completo"}).sort("_id", -1)
+            st.session_state.ensayos_oficiales_col.find(
+                {"$or": [
+                    {"tipo": "ensayo_completo"},
+                    {"tipo": "ensayo_oficial"},
+                    {"tipo": {"$exists": False}}
+                ]}
+            ).sort("_id", -1)
         )
 
         if not ensayos:
             st.info(
-                "📚 La biblioteca está vacía. Pídele al administrador que genere "
-                "ensayos oficiales desde el Panel de Administración."
+                "No hay ensayos oficiales cargados aún. El Administrador debe generar uno desde 'Configuración'."
             )
             return
 
-        for ens in ensayos:
+        cols = st.columns(3, gap="large")
+        for i, ens in enumerate(ensayos):
             eid = str(ens["_id"])
-            total_pregs = len(ens.get("preguntas", []))
-            with st.container(border=True):
-                col_info, col_btn = st.columns([4, 1])
-                with col_info:
-                    st.markdown(f"### 📄 {ens.get('titulo', 'Ensayo DEMRE')}")
-                    st.caption(f"📝 {total_pregs} preguntas  ·  {len(ens.get('textos', {}))} textos")
-                with col_btn:
-                    if st.button("▶ Iniciar", key=f"iniciar_ens_{eid}", use_container_width=True, type="primary"):
-                        st.session_state.ensayo_actual = ens
-                        st.session_state.respuestas_usuario = {}
-                        st.session_state.fase_examen = "ejecucion"
-                        st.rerun()
+            titulo = ens.get("titulo", f"Ensayo Oficial #{i+1}")
+            tiempo = ens.get("tiempo_limite", "02:30:00")
+            num_preguntas = len(ens.get("preguntas", []))
+            with cols[i % 3]:
+                st.markdown(f"""
+                <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: transform 0.3s; margin-bottom: 15px;">
+                    <div style="background: #FEF2F2; color: #991B1B; padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 900; display: inline-block; margin-bottom: 15px; letter-spacing: 0.5px;">OFICIAL DEMRE</div>
+                    <h3 style="margin: 0 0 10px 0; font-size: 20px; font-weight: 900; color: var(--text-color);">{titulo}</h3>
+                    <p style="font-size: 13px; color: #64748B; margin: 0 0 25px 0; font-weight: 500;">⏱️ {tiempo} &nbsp; • &nbsp; 📝 {num_preguntas} Preguntas</p>
+                </div>
+                """, unsafe_allow_html=True)
+                if st.button("Iniciar Simulación 🚀", key=f"iniciar_ens_{eid}", type="primary", use_container_width=True):
+                    st.session_state.ensayo_actual = ens
+                    st.session_state.respuestas_usuario = {}
+                    st.session_state.fase_examen = "ejecucion"
+                    st.rerun()
 
     # ----------------------------------------------------------------
     # FASE 2 — EJECUCIÓN: responder el ensayo

@@ -38,8 +38,15 @@ def llamar_gemini(prompt: str, api_key: str, status=None, max_retries: int = 5):
 def parsear_json_respuesta(text: str) -> dict | None:
     """
     Extrae y parsea el primer objeto JSON del texto de respuesta de Gemini.
-    Devuelve el dict parseado, o None si no hay JSON válido.
+    Maneja bloques markdown, comentarios JS y texto extra alrededor del JSON.
     """
+    # Quitar bloques markdown ```json ... ``` o ``` ... ```
+    text = re.sub(r'```(?:json)?\s*', '', text)
+    # Quitar comentarios de línea estilo JS: // ...
+    text = re.sub(r'//[^\n]*', '', text)
+    # Quitar comas finales antes de } o ] (trailing commas inválidas en JSON)
+    text = re.sub(r',\s*([}\]])', r'\1', text)
+
     match = re.search(r'\{.*\}', text, re.DOTALL)
     if not match:
         return None

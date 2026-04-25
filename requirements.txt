@@ -8,3 +8,4 @@ pymongo[srv]
 dnspython
 python-dotenv
 certifi
+pdfplumber
