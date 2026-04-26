@@ -1008,7 +1008,7 @@ elif st.session_state.menu_actual == 'Nivel de Dificultad':
         with col_adm1:
             st.markdown("""
             <div style="background: #F0FDF4; border: 1px solid #86EFAC; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; min-height: 90px;">
-                <h4 style="margin-top: 0; color: #166534; font-size: 14px;">🏛️ Práctica rápida</h4>
+                <h4 style="margin-top: 0; color: #166534; font-size: 14px;">🏛️ Ensayo DEMRE</h4>
                 <p style="font-size: 12px; color: #15803D; margin-bottom: 0; line-height: 1.4;">Simulacro oficial (65 preguntas) para la biblioteca principal.</p>
             </div>
             """, unsafe_allow_html=True)
@@ -1271,7 +1271,7 @@ FIN DE LA INSTRUCCIÓN
         with col_admin4:
             st.markdown("""
             <div style="background: #FFF1F2; border: 1px solid #FECDD3; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; min-height: 90px;">
-                <h4 style="margin-top: 0; color: #9F1239; font-size: 14px;">📋 Ensayo DEMRE</h4>
+                <h4 style="margin-top: 0; color: #9F1239; font-size: 14px;">📋 Ensayos Oficiales</h4>
                 <p style="font-size: 12px; color: #BE123C; margin-bottom: 0; line-height: 1.4;">Carga ensayos DEMRE reales en PDF o JSON.</p>
             </div>
             """, unsafe_allow_html=True)
