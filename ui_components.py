@@ -89,11 +89,19 @@ body.dark-mode {
 [data-testid="stHeader"], .stApp > header { display: none!important; height: 0px!important; }
 #MainMenu {visibility: hidden;} footer {visibility: hidden;}
 
+/* ELIMINAR FRANJA VACÍA SUPERIOR — apuntar a todos los contenedores de Streamlit */
+[data-testid="stMain"],
+[data-testid="stMainBlockContainer"],
+section.main {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+
 /* 🛡️ FIX DEFINITIVO: FORZAR PANTALLA COMPLETA TOTAL (EDGE-TO-EDGE LIMPIO) */
 div.block-container,
 div[data-testid="stAppViewBlockContainer"],
 div[data-testid="block-container"] {
-    padding-top: 0.4rem!important;
+    padding-top: 0 !important;
     padding-bottom: 50px!important;
     padding-left: 2rem!important;
     padding-right: 2rem!important;
@@ -711,7 +719,7 @@ def render_interfaz_principal():
                     f'<script type="text/babel" src="{jsx_file}"></script>',
                     f'<script type="text/babel">{jsx_content}</script>'
                 )
-        components.html(html_content, height=1100, scrolling=True)
+        components.html(html_content, height=1800, scrolling=True)
 
     # ------------------------------------------------------------------
     # OYENTE: recibe postMessage del wireframe → clickea botón proxy
