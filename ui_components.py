@@ -86,13 +86,21 @@ body.dark-mode {
     border-right: 3px solid #6366f1 !important;
 }
 
-[data-testid="stHeader"], .stApp > header { display: none!important; height: 0px!important; }
+/* OCULTAR COMPLETAMENTE TODOS LOS ELEMENTOS DE CABECERA DE STREAMLIT */
+[data-testid="stHeader"],
+[data-testid="stToolbar"],
+[data-testid="stDecoration"],
+[data-testid="stStatusWidget"],
+.stApp > header,
+header { display: none!important; height: 0!important; min-height: 0!important; overflow: hidden!important; }
 #MainMenu {visibility: hidden;} footer {visibility: hidden;}
 
-/* ELIMINAR FRANJA VACÍA SUPERIOR — apuntar a todos los contenedores de Streamlit */
+/* ELIMINAR FRANJA VACÍA: todos los contenedores posibles a 0 */
+[data-testid="stApp"],
 [data-testid="stMain"],
 [data-testid="stMainBlockContainer"],
-section.main {
+section.main,
+.main {
     padding-top: 0 !important;
     margin-top: 0 !important;
 }
@@ -775,6 +783,35 @@ def render_interfaz_principal():
   setTimeout(hideProxyBtns, 100);
   setTimeout(hideProxyBtns, 500);
   setTimeout(hideProxyBtns, 1500);
+
+  // Eliminar franja vacía superior directamente en el DOM padre
+  function removeTopSpace() {
+    try {
+      var pd = window.parent.document;
+      var hideSelectors = [
+        '[data-testid="stHeader"]',
+        '[data-testid="stToolbar"]',
+        '[data-testid="stDecoration"]',
+        '[data-testid="stStatusWidget"]'
+      ];
+      hideSelectors.forEach(function(sel) {
+        var el = pd.querySelector(sel);
+        if (el) el.style.cssText = 'display:none!important;height:0!important;min-height:0!important;overflow:hidden!important;';
+      });
+      var zeroSelectors = [
+        '[data-testid="stMain"]',
+        '[data-testid="stMainBlockContainer"]',
+        'div.block-container'
+      ];
+      zeroSelectors.forEach(function(sel) {
+        var el = pd.querySelector(sel);
+        if (el) { el.style.paddingTop = '0px'; el.style.marginTop = '0px'; }
+      });
+    } catch(e) {}
+  }
+  setTimeout(removeTopSpace, 50);
+  setTimeout(removeTopSpace, 300);
+  setTimeout(removeTopSpace, 1000);
 
   // Escuchar mensajes enviados al padre por el wireframe
   try {
