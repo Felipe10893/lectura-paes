@@ -95,10 +95,14 @@ body.dark-mode {
 header { display: none!important; height: 0!important; min-height: 0!important; overflow: hidden!important; }
 #MainMenu {visibility: hidden;} footer {visibility: hidden;}
 
+/* SOBREESCRIBIR VARIABLE CSS INTERNA DE STREAMLIT QUE RESERVA ALTURA DEL HEADER */
+:root { --header-height: 0rem !important; }
+
 /* ELIMINAR FRANJA VACÍA: todos los contenedores posibles a 0 */
 [data-testid="stApp"],
 [data-testid="stMain"],
 [data-testid="stMainBlockContainer"],
+[data-testid="stAppViewContainer"],
 section.main,
 .main {
     padding-top: 0 !important;
