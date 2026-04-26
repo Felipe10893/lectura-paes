@@ -120,6 +120,14 @@ if st.session_state.pagina_actual == 'landing':
     ui.render_landing_page()
 
 # ==============================================================================
+# 🔙 BOTÓN VOLVER GLOBAL (aparece en todas las pantallas excepto Home)
+# ==============================================================================
+if st.session_state.menu_actual not in ['Home', 'Dashboard General']:
+    if st.button("⬅️ Volver al inicio", key="global_back"):
+        navegar_a('Home')
+    st.markdown("<hr style='border-top:1px dashed var(--card-border); margin:4px 0 16px 0;'>", unsafe_allow_html=True)
+
+# ==============================================================================
 # 🟢 PANTALLA 1: HOME (DASHBOARD PRINCIPAL MODULARIZADO)
 # ==============================================================================
 if st.session_state.menu_actual in ['Home', 'Dashboard General']:
