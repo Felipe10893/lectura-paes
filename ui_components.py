@@ -633,15 +633,15 @@ body {{ font-family: 'Plus Jakarta Sans', sans-serif; background: #111318; }}
 </div>
 
 <script>
-function doNav(){
-  try{
+function doNav(){{
+  try{{
     var btns=window.parent.document.querySelectorAll('[data-testid=stButton] button');
-    for(var i=0;i<btns.length;i++){
+    for(var i=0;i<btns.length;i++){{
       if((btns[i].textContent||'').trim().startsWith('__NAV__')) continue;
       btns[i].click(); return;
-    }
-  }catch(e){}
-}
+    }}
+  }}catch(e){{}}
+}}
 </script>
 
 <div class="hero" onclick="doNav()" style="cursor:pointer;">
