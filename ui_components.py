@@ -807,7 +807,6 @@ def render_ensayos_demre():
             st.session_state.ensayos_oficiales_col.find(
                 {"$or": [
                     {"tipo": "ensayo_completo"},
-                    {"tipo": "ensayo_oficial"},
                     {"tipo": {"$exists": False}}
                 ]}
             ).sort("_id", -1)

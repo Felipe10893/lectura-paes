@@ -51,6 +51,17 @@ if 'db_conectada' not in st.session_state:
             print("\n" + "="*30)
             print("[OK] CONEXION EXITOSA A MONGODB")
             print("="*30 + "\n")
+            # Migración automática: asignar tipo a documentos sin campo tipo
+            col_of = db['ensayos_oficiales']
+            sin_tipo = list(col_of.find({"tipo": {"$exists": False}}))
+            for doc in sin_tipo:
+                titulo = doc.get("titulo", "").lower()
+                if any(k in titulo for k in ["generado ia", "generado_ia", "2027", "v9", "v5"]):
+                    col_of.update_one({"_id": doc["_id"]}, {"$set": {"tipo": "ensayo_completo"}})
+                elif any(k in titulo for k in ["2024", "2023", "2022", "2021", "oficial regular"]):
+                    col_of.update_one({"_id": doc["_id"]}, {"$set": {"tipo": "ensayo_oficial"}})
+                else:
+                    col_of.update_one({"_id": doc["_id"]}, {"$set": {"tipo": "ensayo_completo"}})
         except Exception as e:
             st.session_state.db_conectada = False
             st.session_state.db_error = str(e)
