@@ -106,7 +106,7 @@ header { display: none!important; height: 0!important; min-height: 0!important; 
 /* SUBIR TODO EL CONTENIDO: margen negativo compensa la altura del header oculto */
 [data-testid="stMainBlockContainer"],
 [data-testid="stAppViewBlockContainer"] {
-    margin-top: -5.5rem !important;
+    margin-top: -8.5rem !important;
     padding-top: 0 !important;
 }
 
