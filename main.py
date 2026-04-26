@@ -1402,6 +1402,47 @@ TEXTO DEL PDF (primeros 60.000 caracteres):
                 except Exception as e:
                     st.error(f"Error al leer el archivo JSON: {e}")
 
+        # ---------------------------------------------------------
+        # HERRAMIENTA: GESTIÓN DE TIPOS (RECLASIFICAR DOCUMENTOS)
+        # ---------------------------------------------------------
+        st.markdown("<hr style='border-top: 1px dashed var(--card-border); margin: 24px 0;'>", unsafe_allow_html=True)
+        with st.container(border=True):
+            st.markdown("<h4 style='color: #64748B; margin-top: 0;'>🗂️ Gestión de Tipos — Reclasificar Documentos</h4>", unsafe_allow_html=True)
+            st.markdown("<p style='color:#64748B; font-size:13px;'>Cambia el tipo de cualquier documento existente en la base de datos (ej: mover un ensayo de 2024 a Ensayos Oficiales).</p>", unsafe_allow_html=True)
+
+            if st.session_state.get('db_conectada'):
+                todos_docs = list(st.session_state.ensayos_oficiales_col.find(
+                    {}, {"titulo": 1, "tipo": 1, "fecha_generacion": 1}
+                ).sort([("fecha_generacion", -1), ("_id", -1)]))
+
+                OPCIONES_TIPO = ["ensayo_oficial", "ensayo_completo", "banco_express", "prueba_gratis", "prueba_gratis_archivo"]
+
+                for doc in todos_docs:
+                    did = str(doc["_id"])
+                    titulo_doc = doc.get("titulo", "Sin título")[:60]
+                    tipo_actual = doc.get("tipo") or "— sin tipo —"
+                    fecha_doc = doc.get("fecha_generacion", None)
+                    fecha_str = fecha_doc.strftime("%d/%m/%Y") if hasattr(fecha_doc, "strftime") else "—"
+
+                    c_tit, c_tipo, c_btn = st.columns([3, 2, 1.2])
+                    with c_tit:
+                        st.markdown(f"<small style='color:#94A3B8'>{fecha_str}</small><br><b style='color:var(--text-color);font-size:13px;'>{titulo_doc}</b>", unsafe_allow_html=True)
+                    with c_tipo:
+                        nuevo_tipo = st.selectbox(
+                            "Tipo", OPCIONES_TIPO,
+                            index=OPCIONES_TIPO.index(tipo_actual) if tipo_actual in OPCIONES_TIPO else 0,
+                            key=f"sel_tipo_{did}", label_visibility="collapsed"
+                        )
+                    with c_btn:
+                        if st.button("Aplicar", key=f"btn_tipo_{did}", use_container_width=True):
+                            st.session_state.ensayos_oficiales_col.update_one(
+                                {"_id": doc["_id"]},
+                                {"$set": {"tipo": nuevo_tipo}}
+                            )
+                            st.success(f"✅ Tipo actualizado a '{nuevo_tipo}'")
+                            st.rerun()
+                    st.markdown("<hr style='margin:4px 0; border-top:1px solid var(--card-border);'>", unsafe_allow_html=True)
+
 # --- FIN DE CODIGO ---
 # --- main.py ---
 # --- App PAES Lenguaje Chile ---
