@@ -644,7 +644,7 @@ body {{ font-family: 'Plus Jakarta Sans', sans-serif; background: #111318; }}
                 <span style="background:rgba(255,255,255,0.15); border-radius:20px; padding:6px 16px; color:white; font-size:13px; font-weight:600;">Análisis por Habilidad</span>
             </div>
             <button class="btn-hero" onclick="window.parent.document.querySelectorAll('[data-testid=stButton] button')[0].click()">
-                PRUEBA GRATIS AHORA
+                INGRESA AQUÍ
             </button>
             <p style="color:rgba(255,255,255,0.5);font-size:13px;margin-top:14px">Acceso gratuito · Sin registro necesario</p>
         </div>
