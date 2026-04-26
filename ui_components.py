@@ -731,7 +731,7 @@ def render_interfaz_principal():
     if html_path.exists():
         html_content = html_path.read_text(encoding="utf-8")
         # Inyectar video1.mp4 como base64 en el placeholder del hero
-        video_path = Path(__file__).parent / "img" / "video1.mp4"
+        video_path = Path(__file__).parent / "img" / "video final.mp4"
         if video_path.exists():
             import base64 as _b64
             video_b64 = _b64.b64encode(video_path.read_bytes()).decode()
