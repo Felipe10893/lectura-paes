@@ -96,13 +96,21 @@ header { display: none!important; height: 0!important; min-height: 0!important; 
 #MainMenu {visibility: hidden;} footer {visibility: hidden;}
 
 /* SOBREESCRIBIR VARIABLE CSS INTERNA DE STREAMLIT QUE RESERVA ALTURA DEL HEADER */
-:root { --header-height: 0rem !important; }
-
-/* ELIMINAR FRANJA VACÍA: todos los contenedores posibles a 0 */
+:root,
 [data-testid="stApp"],
-[data-testid="stMain"],
+[data-testid="stAppViewContainer"] {
+    --header-height: 0px !important;
+    --decoration-height: 0px !important;
+}
+
+/* SUBIR TODO EL CONTENIDO: margen negativo compensa la altura del header oculto */
 [data-testid="stMainBlockContainer"],
-[data-testid="stAppViewContainer"],
+[data-testid="stAppViewBlockContainer"] {
+    margin-top: -5.5rem !important;
+    padding-top: 0 !important;
+}
+
+[data-testid="stMain"],
 section.main,
 .main {
     padding-top: 0 !important;
@@ -113,7 +121,7 @@ section.main,
 div.block-container,
 div[data-testid="stAppViewBlockContainer"],
 div[data-testid="block-container"] {
-    padding-top: 0 !important;
+    padding-top: 0.5rem !important;
     padding-bottom: 50px!important;
     padding-left: 2rem!important;
     padding-right: 2rem!important;
