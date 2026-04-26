@@ -737,7 +737,7 @@ def render_interfaz_principal():
             video_b64 = _b64.b64encode(video_path.read_bytes()).decode()
             video_html = (
                 f'<video autoplay loop muted playsinline '
-                f'style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block;">'
+                f'style="width:100%;height:auto;display:block;border-radius:8px;">'
                 f'<source src="data:video/mp4;base64,{video_b64}" type="video/mp4">'
                 f'</video>'
             )
