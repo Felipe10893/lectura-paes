@@ -178,7 +178,7 @@ elif st.session_state.menu_actual == 'Modo Lectura':
     # FASE 1: DASHBOARD DIAGNÓSTICO Y SELECCIÓN
     # ---------------------------------------------------------
     if st.session_state.fase_express == 'configuracion':
-        st.markdown('<div style="background: rgba(245, 158, 11, 0.1); color: #F59E0B; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; display: inline-block; margin-bottom: 10px; border: 1px solid rgba(245, 158, 11, 0.3);">⚡ PRÁCTICA DIRIGIDA Y EXPRESS</div>', unsafe_allow_html=True)
+        st.markdown('<div style="background: rgba(245, 158, 11, 0.1); color: #F59E0B; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; display: inline-block; margin-bottom: 10px; border: 1px solid rgba(245, 158, 11, 0.3);">⚡ PRÁCTICA RÁPIDA</div>', unsafe_allow_html=True)
         
         col_izq, col_der = st.columns([1.5, 5.5])
         with col_izq:
@@ -201,7 +201,7 @@ elif st.session_state.menu_actual == 'Modo Lectura':
         st.markdown("### 📊 Tu Diagnóstico de Habilidades")
         
         if total_respondidas == 0:
-            st.info("💡 Aún no tenemos suficientes datos para calcular tu diagnóstico. ¡Rinde un Ensayo Oficial o una Práctica Express para empezar a ver tus estadísticas!")
+            st.info("💡 Aún no tenemos suficientes datos para calcular tu diagnóstico. ¡Rinde un Ensayo Oficial o una Práctica Rápida para empezar a ver tus estadísticas!")
             punto_debil = "Interpretar" # Default para el selector
         else:
             pct_loc = int((stats["Localizar"]["acierto"] / stats["Localizar"]["total"]) * 100) if stats["Localizar"]["total"] > 0 else 0
@@ -321,7 +321,7 @@ elif st.session_state.menu_actual == 'Modo Lectura':
 
         # --- SECCIÓN 2: BANCO EXPRESS (PRE-GENERADO) ---
         st.markdown("<br><hr style='border-top: 1px solid var(--card-border); margin: 20px 0;'>", unsafe_allow_html=True)
-        st.markdown("### 📚 Banco de Textos Express (Carga Instantánea)")
+        st.markdown("### 📚 Práctica Rápida (Carga Instantánea)")
         st.markdown("<p style='color:#64748B; font-size: 14px;'>Textos variados del Banco Oficial. Ideal si tienes prisa y no quieres esperar a la IA.</p>", unsafe_allow_html=True)
         
         if st.session_state.get('db_conectada', False):
@@ -329,12 +329,12 @@ elif st.session_state.menu_actual == 'Modo Lectura':
             
             historial_map = {}
             for h in historial_alumno:
-                if h.get("dificultad") == "Práctica Express":
+                if h.get("dificultad") in ("Práctica Express", "Práctica Rápida"):
                     key = f"{h.get('ensayo_id')}_{h.get('texto_id')}"
                     historial_map[key] = h
                 
             if not ensayos_db:
-                st.info("📚 El Banco de Prácticas Rápidas está vacío. Pídele al administrador que genere 'Lotes de Banco Express'.")
+                st.info("📚 El Banco de Práctica Rápida está vacío. Pídele al administrador que genere textos desde el panel de Configuración.")
             else:
                 textos_disponibles = []
                 for ens in ensayos_db:
@@ -435,7 +435,7 @@ elif st.session_state.menu_actual == 'Modo Lectura':
         practica = st.session_state.practica_actual
         texto_data = practica['texto_data']
         preguntas = practica['preguntas']
-        titulo_seccion = practica.get('titulo_override', '⚡ Práctica Express')
+        titulo_seccion = practica.get('titulo_override', '⚡ Práctica Rápida')
         
         col_t, col_b = st.columns([4, 1])
         with col_t:
@@ -490,7 +490,7 @@ elif st.session_state.menu_actual == 'Modo Lectura':
                     "puntaje": resultado['correctas'],
                     "total": resultado['total'],
                     "nota": resultado['nota'],
-                    "dificultad": "Práctica Express",
+                    "dificultad": "Práctica Rápida",
                     "preguntas_data": preguntas,
                     "respuestas_usuario": st.session_state.respuestas_usuario
                 }
@@ -605,7 +605,7 @@ elif st.session_state.menu_actual == 'Prueba Gratis':
             navegar_a('Home')
     with col_titulo:
         st.markdown("<h2 style='margin:0; font-weight:900; color:var(--text-color);'>Prueba GRATIS</h2>", unsafe_allow_html=True)
-        st.markdown("<p style='color:#64748B; margin:4px 0 0 0;'>Un texto corto del Banco Express. Sin registro. Resultado inmediato.</p>", unsafe_allow_html=True)
+        st.markdown("<p style='color:#64748B; margin:4px 0 0 0;'>Un texto corto de Práctica Rápida. Sin registro. Resultado inmediato.</p>", unsafe_allow_html=True)
 
     st.markdown("<hr style='border-top:1px dashed var(--card-border); margin:16px 0;'>", unsafe_allow_html=True)
 
@@ -731,7 +731,7 @@ elif st.session_state.menu_actual == 'Repositorio Admin':
 
     TITULOS_REPO = {
         "ensayo_completo": ("🏛️ Repositorio — Ensayos Completos (65 p. IA)",   "Ensayos oficiales DEMRE generados con IA."),
-        "banco_express":   ("⚡ Repositorio — Banco de Textos Express",          "Lotes de textos cortos para práctica rápida."),
+        "banco_express":   ("⚡ Repositorio — Práctica Rápida",                   "Textos cortos para práctica rápida."),
         "prueba_gratis":   ("🎁 Repositorio — Prueba Gratis",                    "Ejercicios publicados en la Prueba Gratis (activo y archivados)."),
         "ensayo_oficial":  ("📥 Repositorio — Ensayos Oficiales Subidos",        "Ensayos DEMRE reales cargados manualmente."),
     }
@@ -753,7 +753,7 @@ elif st.session_state.menu_actual == 'Repositorio Admin':
 
     TIPOS_LABEL = {
         "ensayo_completo":      ("🏛️ Ensayo Completo IA",  "#F0FDF4", "#166534"),
-        "banco_express":        ("⚡ Banco Express",         "#FFFBEB", "#B45309"),
+        "banco_express":        ("⚡ Práctica Rápida",        "#FFFBEB", "#B45309"),
         "prueba_gratis":        ("🎁 Prueba Gratis",         "#EFF6FF", "#1D4ED8"),
         "prueba_gratis_archivo":("🗄️ Archivado",            "#F8FAFC", "#64748B"),
         "ensayo_oficial":       ("📥 Oficial Subido",        "#FFF1F2", "#9F1239"),
@@ -1134,7 +1134,7 @@ FIN DE LA INSTRUCCIÓN
             st.markdown("""
             <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; min-height: 90px;">
                 <h4 style="margin-top: 0; color: #B45309; font-size: 14px;">⚡ Práctica rápida</h4>
-                <p style="font-size: 12px; color: #92400E; margin-bottom: 0; line-height: 1.4;">Textos cortos para la Biblioteca de Práctica Express.</p>
+                <p style="font-size: 12px; color: #92400E; margin-bottom: 0; line-height: 1.4;">Textos cortos para la Biblioteca de Práctica Rápida.</p>
             </div>
             """, unsafe_allow_html=True)
             
@@ -1178,7 +1178,7 @@ FIN DE LA INSTRUCCIÓN
                             datos_lote['tipo'] = 'banco_express'
                             if st.session_state.get('db_conectada'):
                                 st.session_state.ensayos_oficiales_col.insert_one(datos_lote)
-                            status.update(label="✅ Lote publicado en el Banco de Práctica Express", state="complete")
+                            status.update(label="✅ Lote publicado en Práctica Rápida", state="complete")
                             st.balloons()
                         else:
                             st.error("🚨 La IA no devolvió un JSON válido. Intenta nuevamente.")
@@ -1405,7 +1405,7 @@ TEXTO DEL PDF (primeros 60.000 caracteres):
         st.markdown("<hr style='border-top: 1px dashed var(--card-border); margin: 24px 0;'>", unsafe_allow_html=True)
         with st.container(border=True):
             st.markdown("<h4 style='color: #64748B; margin-top: 0;'>📂 Cargar Archivo Manual (Backup)</h4>", unsafe_allow_html=True)
-            destino_manual = st.selectbox("Destino del Archivo JSON:", ["Ensayo Completo", "Banco Express"])
+            destino_manual = st.selectbox("Destino del Archivo JSON:", ["Ensayo Completo", "Práctica Rápida"])
             archivo_json = st.file_uploader("Sube el archivo .json generado externamente", type=["json"])
             if archivo_json is not None:
                 try:
@@ -1416,7 +1416,7 @@ TEXTO DEL PDF (primeros 60.000 caracteres):
                             if destino_manual == "Ensayo Completo":
                                 datos_ensayo['tipo'] = 'ensayo_completo'
                             else:
-                                datos_ensayo['tipo'] = 'banco_express'
+                                datos_ensayo['tipo'] = 'banco_express'  # Práctica Rápida
                             if st.session_state.get('db_conectada'):
                                 st.session_state.ensayos_oficiales_col.insert_one(datos_ensayo)
                                 st.balloons()
