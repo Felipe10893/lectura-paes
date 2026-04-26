@@ -627,15 +627,27 @@ body {{ font-family: 'Plus Jakarta Sans', sans-serif; background: #111318; }}
         </div>
         <span class="logo-text">PAES Lenguaje</span>
     </div>
-    <button class="nav-btn" onclick="window.parent.document.querySelectorAll('[data-testid=stButton] button')[0].click()">
+    <button class="nav-btn" onclick="doNav()">
         Crear Cuenta Gratuita
     </button>
 </div>
 
-<div class="hero">
+<script>
+function doNav(){
+  try{
+    var btns=window.parent.document.querySelectorAll('[data-testid=stButton] button');
+    for(var i=0;i<btns.length;i++){
+      if((btns[i].textContent||'').trim().startsWith('__NAV__')) continue;
+      btns[i].click(); return;
+    }
+  }catch(e){}
+}
+</script>
+
+<div class="hero" onclick="doNav()" style="cursor:pointer;">
     <div class="hero-photo"></div>
 <div class="hero-content">
-        <div style="position:absolute; left:3%; right:3%; top:45%; transform:translateY(-50%); background:rgba(13,27,90,0.45); padding-top:70px; padding-bottom:70px; padding-left:80px; padding-right:80px; width:94%; box-sizing:border-box; border-radius:24px;">
+        <div onclick="doNav()" style="cursor:pointer;position:absolute; left:3%; right:3%; top:45%; transform:translateY(-50%); background:rgba(13,27,90,0.45); padding-top:70px; padding-bottom:70px; padding-left:80px; padding-right:80px; width:94%; box-sizing:border-box; border-radius:24px;">
 <h1 class="hero-title">Lenguaje PAES<br>Prepárate para el éxito</h1>
             <p class="hero-sub">Domina la comprensión lectora con ensayos oficiales DEMRE, práctica dirigida por IA y seguimiento de progreso en tiempo real.</p>
             <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:32px;">
@@ -643,10 +655,10 @@ body {{ font-family: 'Plus Jakarta Sans', sans-serif; background: #111318; }}
                 <span style="background:rgba(255,255,255,0.15); border-radius:20px; padding:6px 16px; color:white; font-size:13px; font-weight:600;">Motor IA Gemini</span>
                 <span style="background:rgba(255,255,255,0.15); border-radius:20px; padding:6px 16px; color:white; font-size:13px; font-weight:600;">Análisis por Habilidad</span>
             </div>
-            <button class="btn-hero" onclick="window.parent.document.querySelectorAll('[data-testid=stButton] button')[0].click()">
+            <button class="btn-hero" onclick="doNav()">
                 INGRESA AQUÍ
             </button>
-            <p style="color:rgba(255,255,255,0.5);font-size:13px;margin-top:14px">Acceso gratuito · Sin registro necesario</p>
+            <p style="color:rgba(255,255,255,0.5);font-size:13px;margin-top:14px;cursor:pointer;" onclick="doNav()">Acceso gratuito · Sin registro necesario</p>
         </div>
     </div>
     <div style="position:absolute; bottom:5%; left:50%; transform:translateX(-50%); width:80%; background:rgba(13,27,90,0.65); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); border-radius:16px; padding:28px 40px; display:flex; justify-content:space-around; align-items:center;">
