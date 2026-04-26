@@ -730,7 +730,7 @@ def render_interfaz_principal():
     html_path = Path(__file__).parent / "home_redesign.html"
     if html_path.exists():
         html_content = html_path.read_text(encoding="utf-8")
-        # Inyectar video1.mp4 como base64 en el placeholder del hero
+        # Inyectar "video final.mp4" como base64 en el placeholder del hero
         video_path = Path(__file__).parent / "img" / "video final.mp4"
         if video_path.exists():
             import base64 as _b64
