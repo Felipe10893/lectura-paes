@@ -688,6 +688,26 @@ body {{ font-family: 'Plus Jakarta Sans', sans-serif; background: #111318; }}
 def render_interfaz_principal():
     from pathlib import Path
 
+    # Ocultar botones proxy ANTES de que aparezcan en pantalla
+    components.html("""<script>
+(function(){
+  function hideProxy(){
+    try{
+      window.parent.document.querySelectorAll('button').forEach(function(b){
+        if((b.textContent||'').trim().startsWith('__NAV__')){
+          var w=b.closest('[data-testid="stButton"]')||b.parentElement;
+          if(w) w.style.cssText='height:0!important;overflow:hidden!important;margin:0!important;padding:0!important;min-height:0!important;';
+        }
+      });
+    }catch(e){}
+  }
+  hideProxy();
+  setTimeout(hideProxy,30);
+  setTimeout(hideProxy,150);
+  setTimeout(hideProxy,500);
+})();
+</script>""", height=0)
+
     # ------------------------------------------------------------------
     # BOTONES PROXY OCULTOS — el listener JS los clickea desde el iframe
     # ------------------------------------------------------------------
