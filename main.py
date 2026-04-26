@@ -813,6 +813,62 @@ elif st.session_state.menu_actual == 'Repositorio Admin':
             </div>
             """, unsafe_allow_html=True)
 
+elif st.session_state.menu_actual == 'Ensayos Oficiales':
+    st.markdown(ui.CSS_SPLIT_VIEW, unsafe_allow_html=True)
+
+    col_back, col_titulo = st.columns([1.5, 5])
+    with col_back:
+        if st.button("⬅️ VOLVER AL MENÚ", use_container_width=True):
+            navegar_a('Home')
+    with col_titulo:
+        st.markdown("<h2 style='margin:0; font-weight:900; color:var(--text-color);'>📋 Ensayos Oficiales DEMRE — Años Anteriores</h2>", unsafe_allow_html=True)
+        st.markdown("<p style='color:#64748B; margin:4px 0 0 0;'>Pruebas reales DEMRE subidas por el administrador. Formato idéntico al día del examen.</p>", unsafe_allow_html=True)
+
+    st.markdown("<hr style='border-top:1px dashed var(--card-border); margin:16px 0;'>", unsafe_allow_html=True)
+
+    if not st.session_state.get('db_conectada', False):
+        st.warning("Sin conexión a la base de datos.")
+        st.stop()
+
+    ensayos_oficiales = list(
+        st.session_state.ensayos_oficiales_col.find(
+            {"tipo": "ensayo_oficial"}
+        ).sort([("fecha_generacion", -1), ("_id", -1)])
+    )
+
+    if not ensayos_oficiales:
+        st.info("El administrador aún no ha subido ensayos oficiales. Pueden cargarse en PDF o JSON desde el panel de Configuración.")
+        st.stop()
+
+    cols = st.columns(3, gap="large")
+    for i, ens in enumerate(ensayos_oficiales):
+        eid = str(ens["_id"])
+        titulo = ens.get("titulo", f"Ensayo Oficial #{i+1}")
+        tiempo = ens.get("tiempo_limite", "02:30:00")
+        num_preguntas = len(ens.get("preguntas", []))
+        fecha = ens.get("fecha_generacion", None)
+        fecha_str = fecha.strftime("%d/%m/%Y") if hasattr(fecha, "strftime") else "—"
+
+        with cols[i % 3]:
+            st.markdown(f"""
+            <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px;
+                        padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 15px;">
+                <div style="background: #F0FDF4; color: #166534; padding: 4px 10px; border-radius: 6px;
+                            font-size: 10px; font-weight: 900; display: inline-block; margin-bottom: 14px; letter-spacing: 0.5px;">
+                    📋 DEMRE OFICIAL
+                </div>
+                <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 900; color: var(--text-color);">{titulo}</h3>
+                <p style="font-size: 13px; color: #64748B; margin: 0 0 20px 0;">
+                    ⏱️ {tiempo} &nbsp;·&nbsp; 📝 {num_preguntas} preguntas &nbsp;·&nbsp; 📅 {fecha_str}
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+            if st.button("🚀 Iniciar Simulación", key=f"ofic_ini_{eid}", type="primary", use_container_width=True):
+                st.session_state.ensayo_actual = ens
+                st.session_state.respuestas_usuario = {}
+                st.session_state.fase_examen = "ejecucion"
+                navegar_a('Ensayos DEMRE')
+
 elif st.session_state.menu_actual == 'Mi Historial':
     @st.dialog("📋 REVISIÓN DETALLADA", width="large")
     def mostrar_detalle(datos):

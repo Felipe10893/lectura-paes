@@ -670,8 +670,9 @@ def render_interfaz_principal():
         ("__NAV__Mi Progreso",         "nav_prog",   "Mi Progreso"),
         ("__NAV__Mis Descargas",       "nav_desc",   "Mis Descargas"),
         ("__NAV__Nivel de Dificultad", "nav_conf",   "Nivel de Dificultad"),
-        ("__NAV__Prueba Gratis",       "nav_prueba",  "Prueba Gratis"),
+        ("__NAV__Prueba Gratis",        "nav_prueba",  "Prueba Gratis"),
         ("__NAV__Repositorio Admin",   "nav_repo",    "Repositorio Admin"),
+        ("__NAV__Ensayos Oficiales",   "nav_ofic",    "Ensayos Oficiales"),
     ]
     for label, key, destino in NAV_MAP:
         if st.button(label, key=key):
@@ -713,7 +714,8 @@ def render_interfaz_principal():
     'Desafios':           'Mis Descargas',
     'Perfil':             'Nivel de Dificultad',
     'Configuracion':      'Nivel de Dificultad',
-    'Prueba Gratis':      'Prueba Gratis'
+    'Prueba Gratis':      'Prueba Gratis',
+    'Ensayos Oficiales':  'Ensayos Oficiales'
   };
 
   function hideProxyBtns() {
