@@ -730,6 +730,18 @@ def render_interfaz_principal():
     html_path = Path(__file__).parent / "home_redesign.html"
     if html_path.exists():
         html_content = html_path.read_text(encoding="utf-8")
+        # Inyectar video1.mp4 como base64 en el placeholder del hero
+        video_path = Path(__file__).parent / "img" / "video1.mp4"
+        if video_path.exists():
+            import base64 as _b64
+            video_b64 = _b64.b64encode(video_path.read_bytes()).decode()
+            video_html = (
+                f'<video autoplay loop muted playsinline '
+                f'style="width:100%;height:100%;min-height:280px;object-fit:cover;border-radius:14px;">'
+                f'<source src="data:video/mp4;base64,{video_b64}" type="video/mp4">'
+                f'</video>'
+            )
+            html_content = html_content.replace("<!--HERO_VIDEO_PLACEHOLDER-->", video_html)
         for jsx_file in ["design-canvas.jsx", "tweaks-panel.jsx", "sketch-kit.jsx",
                          "web-screens.jsx", "mobile-screens.jsx"]:
             jsx_path = Path(__file__).parent / jsx_file
