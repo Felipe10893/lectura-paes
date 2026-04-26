@@ -591,6 +591,143 @@ elif st.session_state.menu_actual == 'Modo Lectura':
 # ==============================================================================
 # 🟢 PANTALLAS SECUNDARIAS
 # ==============================================================================
+elif st.session_state.menu_actual == 'Practica Rapida':
+    st.markdown(ui.CSS_SPLIT_VIEW, unsafe_allow_html=True)
+
+    col_back, col_titulo = st.columns([1.5, 5])
+    with col_back:
+        if st.button("⬅️ VOLVER AL MENÚ", use_container_width=True):
+            navegar_a('Home')
+    with col_titulo:
+        st.markdown("<h2 style='margin:0; font-weight:900; color:var(--text-color);'>⚡ Práctica Rápida</h2>", unsafe_allow_html=True)
+        st.markdown("<p style='color:#64748B; margin:4px 0 0 0;'>Textos cortos con preguntas. Carga instantánea. Feedback inmediato.</p>", unsafe_allow_html=True)
+
+    st.markdown("<hr style='border-top:1px dashed var(--card-border); margin:16px 0;'>", unsafe_allow_html=True)
+
+    if not st.session_state.get('db_conectada', False):
+        st.warning("Sin conexión a la base de datos.")
+        st.stop()
+
+    fase_pr = st.session_state.get("pr_fase", "lista")
+
+    if fase_pr == "lista":
+        ensayos_pr = list(st.session_state.ensayos_oficiales_col.find({"tipo": "banco_express"}).sort("_id", -1))
+
+        if not ensayos_pr:
+            st.info("El administrador aún no ha publicado ejercicios de Práctica Rápida.")
+            st.stop()
+
+        textos_disponibles = []
+        historial_alumno = list(st.session_state.ensayos_col.find({"usuario": st.session_state.usuario_actual}))
+        historial_map = {f"{h.get('ensayo_id')}_{h.get('texto_id')}": h
+                         for h in historial_alumno if h.get("dificultad") in ("Práctica Express", "Práctica Rápida")}
+
+        for ens in ensayos_pr:
+            e_id = str(ens['_id'])
+            for t_key, t_data in ens.get('textos', {}).items():
+                pregs = [p for p in ens.get('preguntas', []) if str(p.get('texto_id')) == str(t_key)]
+                if pregs:
+                    textos_disponibles.append({'ensayo_id': e_id, 'texto_id': t_key,
+                                               'texto_data': t_data, 'preguntas': pregs,
+                                               'titulo_override': '⚡ Práctica Rápida'})
+
+        cols = st.columns(3, gap="large")
+        for i, item in enumerate(textos_disponibles):
+            h_key = f"{item['ensayo_id']}_{item['texto_id']}"
+            is_done = h_key in historial_map
+            with cols[i % 3]:
+                with st.container(border=True):
+                    t_titulo = item['texto_data'].get('titulo', f"Texto {item['texto_id']}")
+                    st.markdown(f"<h4 style='margin-bottom:4px; font-size:15px; font-weight:800;'>{t_titulo}</h4>", unsafe_allow_html=True)
+                    st.caption(f"📝 {len(item['preguntas'])} preguntas")
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    if is_done:
+                        h_data = historial_map[h_key]
+                        st.success(f"✅ Nota: {h_data.get('nota', 'N/A')}")
+                        if st.button("📊 Ver resultado", key=f"pr_rev_{h_key}", use_container_width=True):
+                            st.session_state.pr_record = h_data
+                            st.session_state.pr_fase = "revision"
+                            st.rerun()
+                    else:
+                        st.info("⏳ Pendiente")
+                        if st.button("⚡ Practicar ahora", key=f"pr_ini_{h_key}", use_container_width=True, type="primary"):
+                            st.session_state.pr_item = item
+                            st.session_state.pr_resps = {}
+                            st.session_state.pr_fase = "rendir"
+                            st.rerun()
+
+    elif fase_pr == "rendir":
+        item = st.session_state.pr_item
+        texto_data = item['texto_data']
+        preguntas = item['preguntas']
+
+        col_t, col_b = st.columns([4, 1])
+        with col_t:
+            st.markdown("## ⚡ Práctica Rápida")
+        with col_b:
+            if st.button("⬅️ Volver", use_container_width=True):
+                st.session_state.pr_fase = "lista"
+                st.rerun()
+
+        c_text, c_preg = st.columns([1.2, 1], gap="large")
+        with c_text:
+            st.markdown(f"<h3 style='margin-bottom:16px;'>{texto_data.get('titulo','Texto')}</h3>", unsafe_allow_html=True)
+            st.markdown(f"<div class='scrollable-text-panel'>{texto_data.get('contenido','')}</div>", unsafe_allow_html=True)
+        with c_preg:
+            st.markdown(f"#### Preguntas ({len(preguntas)})")
+            for i, p in enumerate(preguntas):
+                pid = p['id']
+                with st.container(border=True):
+                    st.markdown(f"**{i+1}. {p['enunciado']}**")
+                    saved = st.session_state.pr_resps.get(pid)
+                    idx = p['opciones'].index(saved) if saved in p.get('opciones', []) else None
+                    resp = st.radio(f"Opc{i}", p['opciones'], index=idx, key=f"pr_r_{pid}", label_visibility="collapsed")
+                    if resp:
+                        st.session_state.pr_resps[pid] = resp
+            st.markdown("<br>", unsafe_allow_html=True)
+            if st.button("✅ VER MI RESULTADO", type="primary", use_container_width=True):
+                correctas = sum(1 for p in preguntas
+                                if st.session_state.pr_resps.get(p['id']) == p['opciones'][p.get('correcta', 0)])
+                total = len(preguntas)
+                nota = round(((correctas / total) * 6.0) + 1.0, 1) if total > 0 else 1.0
+                record = {
+                    "usuario": st.session_state.usuario_actual,
+                    "ensayo_id": item['ensayo_id'], "texto_id": item['texto_id'],
+                    "titulo_ensayo": f"Práctica Rápida: {texto_data.get('titulo','')}",
+                    "fecha": datetime.now(), "puntaje": correctas, "total": total, "nota": nota,
+                    "dificultad": "Práctica Rápida",
+                    "preguntas_data": preguntas, "respuestas_usuario": st.session_state.pr_resps
+                }
+                if st.session_state.get('db_conectada'):
+                    try: st.session_state.ensayos_col.insert_one(record)
+                    except: pass
+                st.session_state.pr_record = record
+                st.session_state.pr_fase = "revision"
+                st.rerun()
+
+    elif fase_pr == "revision":
+        rec = st.session_state.pr_record
+        col1, col2 = st.columns([4, 1])
+        with col1: st.markdown("## 📊 Resultado")
+        with col2:
+            if st.button("⬅️ Volver", use_container_width=True):
+                st.session_state.pr_fase = "lista"
+                st.rerun()
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Correctas", f"{rec['puntaje']} / {rec['total']}")
+        c2.metric("Nota", rec['nota'])
+        c3.metric("Precisión", f"{int((rec['puntaje']/rec['total'])*100) if rec['total']>0 else 0}%")
+        st.markdown("<hr style='margin:16px 0;'>")
+        for i, p in enumerate(rec.get('preguntas_data', [])):
+            pid = p['id']
+            r_user = rec.get('respuestas_usuario', {}).get(pid)
+            r_correcta = p['opciones'][p.get('correcta', 0)]
+            es_ok = r_user == r_correcta
+            with st.expander(f"{'✅' if es_ok else '❌'} Pregunta {i+1}: {p['enunciado'][:60]}..."):
+                st.markdown(f"**Tu respuesta:** {r_user or 'Sin responder'}")
+                if not es_ok: st.markdown(f"**Correcta:** {r_correcta}")
+                st.info(f"**Explicación:** {p.get('explicacion','No disponible.')}")
+
 elif st.session_state.menu_actual == 'Prueba Gratis':
     import random
     st.markdown(ui.CSS_SPLIT_VIEW, unsafe_allow_html=True)
