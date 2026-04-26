@@ -1447,8 +1447,13 @@ TEXTO DEL PDF (primeros 60.000 caracteres):
             if st.session_state.get('db_conectada'):
                 from bson import ObjectId
                 todos_docs = list(st.session_state.ensayos_oficiales_col.find(
-                    {}, {"titulo": 1, "tipo": 1, "fecha_generacion": 1}
+                    {"$or": [{"tipo": {"$exists": False}}, {"tipo": None}]},
+                    {"titulo": 1, "tipo": 1, "fecha_generacion": 1}
                 ).sort([("fecha_generacion", -1), ("_id", -1)]))
+
+                if not todos_docs:
+                    st.success("✅ Todos los documentos están clasificados correctamente.")
+                    st.stop()
 
                 # Mapeo nombre legible → tipo interno MongoDB
                 LABEL_A_TIPO = {
