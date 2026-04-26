@@ -673,6 +673,7 @@ def render_interfaz_principal():
         ("__NAV__Prueba Gratis",        "nav_prueba",  "Prueba Gratis"),
         ("__NAV__Repositorio Admin",   "nav_repo",    "Repositorio Admin"),
         ("__NAV__Ensayos Oficiales",   "nav_ofic",    "Ensayos Oficiales"),
+        ("__NAV__Practica Rapida",      "nav_pr",      "Practica Rapida"),
     ]
     for label, key, destino in NAV_MAP:
         if st.button(label, key=key):
@@ -715,7 +716,8 @@ def render_interfaz_principal():
     'Perfil':             'Nivel de Dificultad',
     'Configuracion':      'Nivel de Dificultad',
     'Prueba Gratis':      'Prueba Gratis',
-    'Ensayos Oficiales':  'Ensayos Oficiales'
+    'Ensayos Oficiales':  'Ensayos Oficiales',
+    'Practica Rapida':    'Practica Rapida'
   };
 
   function hideProxyBtns() {
