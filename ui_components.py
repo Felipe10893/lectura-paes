@@ -106,7 +106,7 @@ header { display: none!important; height: 0!important; min-height: 0!important; 
 /* SUBIR TODO EL CONTENIDO: margen negativo compensa la altura del header oculto */
 [data-testid="stMainBlockContainer"],
 [data-testid="stAppViewBlockContainer"] {
-    margin-top: -8.5rem !important;
+    margin-top: -9.5rem !important;
     padding-top: 0 !important;
 }
 
@@ -739,7 +739,7 @@ def render_interfaz_principal():
                     f'<script type="text/babel" src="{jsx_file}"></script>',
                     f'<script type="text/babel">{jsx_content}</script>'
                 )
-        components.html(html_content, height=1800, scrolling=True)
+        components.html(html_content, height=2200, scrolling=True)
 
     # ------------------------------------------------------------------
     # OYENTE: recibe postMessage del wireframe → clickea botón proxy
