@@ -93,7 +93,7 @@ body.dark-mode {
 div.block-container,
 div[data-testid="stAppViewBlockContainer"],
 div[data-testid="block-container"] {
-    padding-top: 1.5rem!important;
+    padding-top: 0.4rem!important;
     padding-bottom: 50px!important;
     padding-left: 2rem!important;
     padding-right: 2rem!important;
@@ -681,6 +681,22 @@ def render_interfaz_principal():
             st.rerun()
 
     # ------------------------------------------------------------------
+    # ATAJOS DE NAVEGACIÓN (fila superior, antes del wireframe)
+    # ------------------------------------------------------------------
+    sc1, sc2, sc3, sc4 = st.columns(4)
+    nav_shortcuts = [
+        (sc1, "🕒  Mi Historial",     "h_bt", "Mi Historial"),
+        (sc2, "📈  Mi Avance",         "p_bt", "Mi Progreso"),
+        (sc3, "🏆  Desafíos",          "d_bt", "Mis Descargas"),
+        (sc4, "⚙️  Configuración",    "c_bt", "Nivel de Dificultad"),
+    ]
+    for col, label, key, screen in nav_shortcuts:
+        with col:
+            if st.button(label, key=key, use_container_width=True):
+                st.session_state.menu_actual = screen
+                st.rerun()
+
+    # ------------------------------------------------------------------
     # WIREFRAME (diseño sketch con Kalam)
     # ------------------------------------------------------------------
     html_path = Path(__file__).parent / "home_redesign.html"
@@ -764,22 +780,6 @@ def render_interfaz_principal():
 </script>
 """, height=0)
 
-    # ------------------------------------------------------------------
-    # ATAJOS VISIBLES (fila inferior)
-    # ------------------------------------------------------------------
-    st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
-    sc1, sc2, sc3, sc4 = st.columns(4)
-    nav_shortcuts = [
-        (sc1, "🕒  Mi Historial",     "h_bt", "Mi Historial"),
-        (sc2, "📈  Mi Avance",         "p_bt", "Mi Progreso"),
-        (sc3, "🏆  Desafíos",          "d_bt", "Mis Descargas"),
-        (sc4, "⚙️  Configuración",    "c_bt", "Nivel de Dificultad"),
-    ]
-    for col, label, key, screen in nav_shortcuts:
-        with col:
-            if st.button(label, key=key, use_container_width=True):
-                st.session_state.menu_actual = screen
-                st.rerun()
 
 
 # ==============================================================================
