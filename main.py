@@ -1441,11 +1441,10 @@ TEXTO DEL PDF (primeros 60.000 caracteres):
 
                 # Mapeo nombre legible → tipo interno MongoDB
                 LABEL_A_TIPO = {
-                    "🏛️ Ensayo DEMRE":       "ensayo_completo",
-                    "⚡ Práctica rápida":     "banco_express",
-                    "🎁 Prueba Gratis":       "prueba_gratis",
-                    "📋 Ensayos Oficiales":   "ensayo_oficial",
-                    "🗄️ Prueba Gratis (arch.)": "prueba_gratis_archivo",
+                    "🏛️ Ensayo DEMRE":     "ensayo_completo",
+                    "⚡ Práctica rápida":   "banco_express",
+                    "🎁 Prueba Gratis":     "prueba_gratis",
+                    "📋 Ensayos Oficiales": "ensayo_oficial",
                 }
                 TIPO_A_LABEL = {v: k for k, v in LABEL_A_TIPO.items()}
                 OPCIONES_LABEL = list(LABEL_A_TIPO.keys())
