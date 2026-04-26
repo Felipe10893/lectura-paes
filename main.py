@@ -1439,38 +1439,49 @@ TEXTO DEL PDF (primeros 60.000 caracteres):
                     {}, {"titulo": 1, "tipo": 1, "fecha_generacion": 1}
                 ).sort([("fecha_generacion", -1), ("_id", -1)]))
 
-                OPCIONES_TIPO = ["ensayo_oficial", "ensayo_completo", "banco_express", "prueba_gratis", "prueba_gratis_archivo"]
+                # Mapeo nombre legible → tipo interno MongoDB
+                LABEL_A_TIPO = {
+                    "🏛️ Ensayo DEMRE":       "ensayo_completo",
+                    "⚡ Práctica rápida":     "banco_express",
+                    "🎁 Prueba Gratis":       "prueba_gratis",
+                    "📋 Ensayos Oficiales":   "ensayo_oficial",
+                    "🗄️ Prueba Gratis (arch.)": "prueba_gratis_archivo",
+                }
+                TIPO_A_LABEL = {v: k for k, v in LABEL_A_TIPO.items()}
+                OPCIONES_LABEL = list(LABEL_A_TIPO.keys())
 
                 for doc in todos_docs:
                     did = str(doc["_id"])
                     titulo_doc = doc.get("titulo", "Sin título")[:60]
                     tipo_actual = doc.get("tipo") or ""
+                    label_actual = TIPO_A_LABEL.get(tipo_actual, OPCIONES_LABEL[0])
                     fecha_doc = doc.get("fecha_generacion", None)
                     fecha_str = fecha_doc.strftime("%d/%m/%Y") if hasattr(fecha_doc, "strftime") else "—"
 
-                    idx_actual = OPCIONES_TIPO.index(tipo_actual) if tipo_actual in OPCIONES_TIPO else 0
+                    idx_actual = OPCIONES_LABEL.index(label_actual) if label_actual in OPCIONES_LABEL else 0
 
                     c_tit, c_tipo, c_btn = st.columns([3, 2, 1.2])
                     with c_tit:
-                        st.markdown(f"<small style='color:#94A3B8'>{fecha_str} · actual: <b>{tipo_actual or 'sin tipo'}</b></small><br><b style='color:var(--text-color);font-size:13px;'>{titulo_doc}</b>", unsafe_allow_html=True)
+                        st.markdown(f"<small style='color:#94A3B8'>{fecha_str} · actual: <b>{label_actual}</b></small><br><b style='color:var(--text-color);font-size:13px;'>{titulo_doc}</b>", unsafe_allow_html=True)
                     with c_tipo:
                         st.selectbox(
-                            "Tipo", OPCIONES_TIPO,
+                            "Tipo", OPCIONES_LABEL,
                             index=idx_actual,
                             key=f"sel_tipo_{did}", label_visibility="collapsed"
                         )
                     with c_btn:
                         if st.button("✅ Aplicar", key=f"btn_tipo_{did}", use_container_width=True):
-                            tipo_elegido = st.session_state.get(f"sel_tipo_{did}", OPCIONES_TIPO[0])
+                            label_elegida = st.session_state.get(f"sel_tipo_{did}", OPCIONES_LABEL[0])
+                            tipo_elegido = LABEL_A_TIPO.get(label_elegida, "ensayo_completo")
                             try:
                                 result = st.session_state.ensayos_oficiales_col.update_one(
                                     {"_id": ObjectId(did)},
                                     {"$set": {"tipo": tipo_elegido}}
                                 )
                                 if result.modified_count > 0:
-                                    st.session_state["_gestion_msg"] = ("ok", f"✅ '{titulo_doc}' → tipo actualizado a '{tipo_elegido}'")
+                                    st.session_state["_gestion_msg"] = ("ok", f"✅ '{titulo_doc}' → movido a '{label_elegida}'")
                                 else:
-                                    st.session_state["_gestion_msg"] = ("ok", f"ℹ️ El documento ya tenía tipo '{tipo_elegido}' — sin cambios.")
+                                    st.session_state["_gestion_msg"] = ("ok", f"ℹ️ Ya estaba en '{label_elegida}' — sin cambios.")
                             except Exception as e:
                                 st.session_state["_gestion_msg"] = ("err", f"Error al actualizar: {e}")
                             st.rerun()
