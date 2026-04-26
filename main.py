@@ -979,10 +979,25 @@ elif st.session_state.menu_actual == 'Nivel de Dificultad':
     # --- PANEL DE ADMINISTRADOR OCULTO ---
     st.markdown("<hr style='margin: 40px 0; border-top: 1px dashed var(--card-border);'>", unsafe_allow_html=True)
     st.markdown("<h3 style='color: #64748B;'>🔐 Zona de Administración (EdTech Lead)</h3>", unsafe_allow_html=True)
-    
-    admin_pass = st.text_input("Ingresa la credencial maestra para gestionar la Base de Datos:", type="password")
-    
-    if admin_pass == os.environ.get("ADMIN_PASS", ""):
+
+    # Mantener autenticación entre navegaciones
+    if not st.session_state.get('admin_autenticado', False):
+        admin_pass = st.text_input("Ingresa la credencial maestra para gestionar la Base de Datos:", type="password")
+        if admin_pass == os.environ.get("ADMIN_PASS", ""):
+            st.session_state.admin_autenticado = True
+            st.rerun()
+        elif admin_pass:
+            st.error("Clave incorrecta.")
+    else:
+        col_info, col_logout = st.columns([4, 1])
+        with col_info:
+            st.success("✅ Acceso Concedido: Privilegios de Administrador Activados")
+        with col_logout:
+            if st.button("🔒 Cerrar sesión", use_container_width=True):
+                st.session_state.admin_autenticado = False
+                st.rerun()
+
+    if st.session_state.get('admin_autenticado', False):
         st.success("✅ Acceso Concedido: Privilegios de Administrador Activados")
         
         # ---------------------------------------------------------
