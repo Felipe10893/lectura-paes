@@ -1574,6 +1574,117 @@ TEXTO DEL PDF (primeros 60.000 caracteres):
                     st.error(f"Error al leer el archivo JSON: {e}")
 
         # ---------------------------------------------------------
+        # CONSOLIDAR 7 LECTURAS EN UN ENSAYO COMPLETO
+        # ---------------------------------------------------------
+        st.markdown("<hr style='border-top: 1px dashed var(--card-border); margin: 24px 0;'>", unsafe_allow_html=True)
+        with st.container(border=True):
+            st.markdown("<h4 style='color: #166534; margin-top: 0;'>📦 Consolidar 7 Lecturas → Ensayo Completo</h4>", unsafe_allow_html=True)
+            st.markdown("<p style='color:#64748B; font-size:13px;'>Sube los 7 archivos JSON (uno por lectura) generados externamente. Los convierte y guarda como un único Ensayo Completo de 65 preguntas en MongoDB.</p>", unsafe_allow_html=True)
+
+            titulo_consolidado = st.text_input(
+                "Título del Ensayo Consolidado:",
+                value="Ensayo DEMRE 2027 - Importado",
+                key="titulo_consolidado"
+            )
+
+            archivos_lecturas = st.file_uploader(
+                "Sube los 7 archivos de lecturas (.json o .txt):",
+                type=["json", "txt"],
+                accept_multiple_files=True,
+                key="uploader_7_lecturas"
+            )
+
+            if archivos_lecturas:
+                n = len(archivos_lecturas)
+                color = "#166534" if n == 7 else "#B45309"
+                st.markdown(f"<p style='color:{color}; font-weight:700; font-size:13px;'>📁 {n} archivo(s) cargado(s) {'✅' if n == 7 else '— se necesitan 7'}.</p>", unsafe_allow_html=True)
+
+            if archivos_lecturas and len(archivos_lecturas) >= 1:
+                if st.button("🔗 CONSOLIDAR Y GUARDAR EN MONGODB", type="primary", key="btn_consolidar", use_container_width=True):
+                    try:
+                        CLAVE_A_IDX = {"A": 0, "B": 1, "C": 2, "D": 3}
+                        lecturas_raw = []
+
+                        for f in archivos_lecturas:
+                            content = f.read()
+                            try:
+                                data = json.loads(content.decode("utf-8"))
+                            except Exception:
+                                data = json.loads(content.decode("latin-1"))
+                            lecturas_raw.append(data)
+
+                        lecturas_raw.sort(key=lambda x: x.get("lectura_nro", 0))
+
+                        textos_dict = {}
+                        preguntas_list = []
+
+                        for lec in lecturas_raw:
+                            nro = str(lec.get("lectura_nro", len(textos_dict) + 1))
+                            titulo_lec = lec.get("titulo", f"LECTURA {nro}")
+                            tipo_texto = lec.get("tipo_texto", "")
+                            fuente = lec.get("fuente", "")
+
+                            contenido_arr = lec.get("contenido", [])
+                            parrafos = [p.get("texto", "") for p in contenido_arr if p.get("texto")]
+                            contenido_html = "<br><br>".join(parrafos)
+                            if fuente:
+                                contenido_html += f"<br><br><em>Fuente: {fuente}</em>"
+
+                            titulo_completo = f"{titulo_lec} ({tipo_texto})" if tipo_texto else titulo_lec
+                            textos_dict[nro] = {"titulo": titulo_completo, "contenido": contenido_html}
+
+                            for preg in lec.get("preguntas", []):
+                                numero = preg.get("numero", len(preguntas_list) + 1)
+                                opciones_raw = preg.get("opciones", {})
+                                opciones_list = [
+                                    f"A) {opciones_raw.get('A', '')}",
+                                    f"B) {opciones_raw.get('B', '')}",
+                                    f"C) {opciones_raw.get('C', '')}",
+                                    f"D) {opciones_raw.get('D', '')}",
+                                ]
+                                sol = preg.get("solucionario", {})
+                                clave = str(sol.get("clave", "A")).strip().upper()
+                                correcta_int = CLAVE_A_IDX.get(clave, 0)
+                                explicacion = (
+                                    f"CLAVE: {clave} | "
+                                    f"MACRO-HABILIDAD: {sol.get('macro_habilidad', '')} | "
+                                    f"TAREA: {sol.get('tarea_especifica', '')} | "
+                                    f"CONOCIMIENTO: {sol.get('conocimiento', '')} | "
+                                    f"JUSTIFICACIÓN: {sol.get('justificacion', '')} | "
+                                    f"DISTRACTORES: {sol.get('analisis_distractores', '')}"
+                                )
+                                preguntas_list.append({
+                                    "id": numero,
+                                    "texto_id": nro,
+                                    "enunciado": preg.get("enunciado", ""),
+                                    "opciones": opciones_list,
+                                    "correcta": correcta_int,
+                                    "explicacion": explicacion
+                                })
+
+                        preguntas_list.sort(key=lambda x: x.get("id", 0))
+
+                        doc_consolidado = {
+                            "titulo": titulo_consolidado,
+                            "tipo": "ensayo_completo",
+                            "tiempo_limite": "02:30:00",
+                            "fecha_generacion": datetime.now(),
+                            "reporte_final": f"Importado: {len(lecturas_raw)} lecturas, {len(preguntas_list)} preguntas.",
+                            "textos": textos_dict,
+                            "preguntas": preguntas_list
+                        }
+
+                        if st.session_state.get('db_conectada'):
+                            st.session_state.ensayos_oficiales_col.insert_one(doc_consolidado)
+                            st.success(f"✅ ¡Ensayo consolidado guardado! {len(lecturas_raw)} lecturas · {len(preguntas_list)} preguntas → MongoDB")
+                            st.balloons()
+                        else:
+                            st.error("Sin conexión a la Base de Datos.")
+
+                    except Exception as e:
+                        st.error(f"Error al consolidar: {e}")
+
+        # ---------------------------------------------------------
         # HERRAMIENTA: GESTIÓN DE TIPOS (RECLASIFICAR DOCUMENTOS)
         # ---------------------------------------------------------
         st.markdown("<hr style='border-top: 1px dashed var(--card-border); margin: 24px 0;'>", unsafe_allow_html=True)
