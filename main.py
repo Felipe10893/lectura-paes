@@ -1622,9 +1622,17 @@ TEXTO DEL PDF (primeros 60.000 caracteres):
 
                         for nombre, content in st.session_state['_lec_bytes']:
                             try:
-                                data = json.loads(content.decode("utf-8-sig"))
+                                texto = content.decode("utf-8-sig")
                             except Exception:
-                                data = json.loads(content.decode("latin-1"))
+                                texto = content.decode("latin-1")
+                            texto = texto.strip()
+                            # Eliminar bloque markdown ```json ... ``` si existe
+                            if texto.startswith("```"):
+                                texto = texto.split("\n", 1)[1] if "\n" in texto else texto[3:]
+                            if texto.endswith("```"):
+                                texto = texto.rsplit("\n", 1)[0]
+                            texto = texto.strip()
+                            data = json.loads(texto)
                             lecturas_raw.append(data)
 
                         lecturas_raw.sort(key=lambda x: x.get("lectura_nro", 0))
