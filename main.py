@@ -1594,18 +1594,27 @@ TEXTO DEL PDF (primeros 60.000 caracteres):
                 key="uploader_7_lecturas"
             )
 
-            # Guardar bytes en session_state apenas se suben (antes de cualquier rerun por botón)
+            # Guardar bytes SOLO si son archivos nuevos (distinto nombre/cantidad)
+            # En el rerun del botón, los archivos del uploader pierden el contenido → no sobreescribir
             if archivos_lecturas:
-                st.session_state['_lec_bytes'] = [(f.name, f.getvalue()) for f in archivos_lecturas]
-                n = len(archivos_lecturas)
-                color = "#166534" if n == 7 else "#B45309"
-                st.markdown(f"<p style='color:{color}; font-weight:700; font-size:13px;'>📁 {n} archivo(s) cargado(s) {'✅' if n == 7 else '— se necesitan 7'}.</p>", unsafe_allow_html=True)
-            elif st.session_state.get('_lec_bytes'):
-                n = len(st.session_state['_lec_bytes'])
-                color = "#166534" if n == 7 else "#B45309"
-                st.markdown(f"<p style='color:{color}; font-weight:700; font-size:13px;'>📁 {n} archivo(s) en memoria {'✅' if n == 7 else ''}.</p>", unsafe_allow_html=True)
+                nombres_nuevos = sorted([f.name for f in archivos_lecturas])
+                nombres_guardados = sorted([n for n, _ in st.session_state.get('_lec_bytes', [])]) if st.session_state.get('_lec_bytes') else []
+                if nombres_nuevos != nombres_guardados:
+                    bytes_list = []
+                    for f in archivos_lecturas:
+                        try:
+                            f.seek(0)
+                        except Exception:
+                            pass
+                        bytes_list.append((f.name, f.read()))
+                    st.session_state['_lec_bytes'] = bytes_list
 
-            if st.session_state.get('_lec_bytes'):
+            n_guardados = len(st.session_state.get('_lec_bytes', []))
+            if n_guardados > 0:
+                color = "#166534" if n_guardados == 7 else "#B45309"
+                st.markdown(f"<p style='color:{color}; font-weight:700; font-size:13px;'>📁 {n_guardados} archivo(s) listos {'✅' if n_guardados == 7 else '— se necesitan 7'}.</p>", unsafe_allow_html=True)
+
+            if n_guardados >= 1:
                 if st.button("🔗 CONSOLIDAR Y GUARDAR EN MONGODB", type="primary", key="btn_consolidar", use_container_width=True):
                     try:
                         CLAVE_A_IDX = {"A": 0, "B": 1, "C": 2, "D": 3}
@@ -1613,7 +1622,7 @@ TEXTO DEL PDF (primeros 60.000 caracteres):
 
                         for nombre, content in st.session_state['_lec_bytes']:
                             try:
-                                data = json.loads(content.decode("utf-8"))
+                                data = json.loads(content.decode("utf-8-sig"))
                             except Exception:
                                 data = json.loads(content.decode("latin-1"))
                             lecturas_raw.append(data)
