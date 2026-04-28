@@ -1594,19 +1594,24 @@ TEXTO DEL PDF (primeros 60.000 caracteres):
                 key="uploader_7_lecturas"
             )
 
+            # Guardar bytes en session_state apenas se suben (antes de cualquier rerun por botón)
             if archivos_lecturas:
+                st.session_state['_lec_bytes'] = [(f.name, f.getvalue()) for f in archivos_lecturas]
                 n = len(archivos_lecturas)
                 color = "#166534" if n == 7 else "#B45309"
                 st.markdown(f"<p style='color:{color}; font-weight:700; font-size:13px;'>📁 {n} archivo(s) cargado(s) {'✅' if n == 7 else '— se necesitan 7'}.</p>", unsafe_allow_html=True)
+            elif st.session_state.get('_lec_bytes'):
+                n = len(st.session_state['_lec_bytes'])
+                color = "#166534" if n == 7 else "#B45309"
+                st.markdown(f"<p style='color:{color}; font-weight:700; font-size:13px;'>📁 {n} archivo(s) en memoria {'✅' if n == 7 else ''}.</p>", unsafe_allow_html=True)
 
-            if archivos_lecturas and len(archivos_lecturas) >= 1:
+            if st.session_state.get('_lec_bytes'):
                 if st.button("🔗 CONSOLIDAR Y GUARDAR EN MONGODB", type="primary", key="btn_consolidar", use_container_width=True):
                     try:
                         CLAVE_A_IDX = {"A": 0, "B": 1, "C": 2, "D": 3}
                         lecturas_raw = []
 
-                        for f in archivos_lecturas:
-                            content = f.getvalue()
+                        for nombre, content in st.session_state['_lec_bytes']:
                             try:
                                 data = json.loads(content.decode("utf-8"))
                             except Exception:
