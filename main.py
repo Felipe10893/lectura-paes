@@ -1606,7 +1606,7 @@ TEXTO DEL PDF (primeros 60.000 caracteres):
                         lecturas_raw = []
 
                         for f in archivos_lecturas:
-                            content = f.read()
+                            content = f.getvalue()
                             try:
                                 data = json.loads(content.decode("utf-8"))
                             except Exception:
