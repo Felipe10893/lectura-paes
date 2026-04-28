@@ -1626,13 +1626,18 @@ TEXTO DEL PDF (primeros 60.000 caracteres):
                             except Exception:
                                 texto = content.decode("latin-1")
                             texto = texto.strip()
-                            # Eliminar bloque markdown ```json ... ``` si existe
                             if texto.startswith("```"):
                                 texto = texto.split("\n", 1)[1] if "\n" in texto else texto[3:]
                             if texto.endswith("```"):
                                 texto = texto.rsplit("\n", 1)[0]
                             texto = texto.strip()
-                            data = json.loads(texto)
+                            try:
+                                data = json.loads(texto)
+                            except json.JSONDecodeError as je:
+                                lineas = texto.splitlines()
+                                linea_err = lineas[je.lineno - 1] if je.lineno <= len(lineas) else ""
+                                st.error(f"❌ Error JSON en **{nombre}** — línea {je.lineno}, columna {je.colno}:\n\n`{linea_err.strip()}`\n\nVerifica las comillas y comas en esa línea.")
+                                st.stop()
                             lecturas_raw.append(data)
 
                         lecturas_raw.sort(key=lambda x: x.get("lectura_nro", 0))
