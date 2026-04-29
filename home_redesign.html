@@ -633,13 +633,8 @@
 
   </div>
 
-  <hr class="sk-divider" style="margin-bottom: 36px;"/>
-
-  <!-- PANEL RÁPIDO: 4 STAT CARDS -->
-  <div class="section-title">Tu panel</div>
-  <div class="section-sub">Accede rápido a tus secciones →</div>
-
-  <div class="stats-grid">
+  <!-- PANEL RÁPIDO: 4 STAT CARDS (oculto) -->
+  <div class="stats-grid" style="display:none;">
 
     <div class="stat-card sk-box" style="cursor: pointer;" onclick="navigateTo('Historial')">
       <div class="stat-card-top">
@@ -689,100 +684,6 @@
     <button class="sk-btn" style="border-style: dashed;" onclick="navigateTo('Configuracion')">Abrir panel →</button>
   </div>
 
-  <hr class="sk-divider" style="margin: 56px 0 48px 0;"/>
-
-  <!-- SECCIÓN VIDEOS - "Practica donde estés" -->
-  <div style="text-align: center; margin-bottom: 48px;">
-    <span class="sk-badge hi" style="margin-bottom: 10px; display: inline-block;">Así usan LectoPAES</span>
-    <h2 class="section-title sk-h" style="font-size: 44px; line-height: 1; margin-bottom: 8px;">
-      Practica donde <span class="sk-underline">estés</span>
-    </h2>
-    <p class="section-sub" style="font-size: 16px; color: var(--ink2); max-width: 520px; margin: 0 auto;">
-      En el bolsillo o en tu escritorio. Mismos ejercicios, mismo avance, sincronizados.
-    </p>
-  </div>
-
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-bottom: 56px;">
-
-    <!-- VIDEO 1 — En el metro -->
-    <div class="card sk-box shadow" style="position: relative;">
-      <div style="position: absolute; top: -16px; left: -16px; transform: rotate(-5deg);">
-        <span class="sk-annotation">camino al cole 🚇</span>
-      </div>
-
-      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
-        <div class="sk-box fill-coral" style="width: 28px; height: 28px; border-radius: 14px; display: flex; align-items: center; justify-content: center;">
-          <span class="sk-h" style="font-size: 14px;">C</span>
-        </div>
-        <div>
-          <div class="sk-body" style="font-size: 13px; font-weight: 700;">Catalina, 17</div>
-          <div class="sk-mono" style="font-size: 10px; color: var(--mute);">Línea 1 · 8:42 AM</div>
-        </div>
-        <div style="flex: 1;"></div>
-        <span class="sk-badge" style="background: var(--paper); border: 1px solid var(--ink);">📱 Móvil</span>
-      </div>
-
-      <!-- Video placeholder -->
-      <div style="position: relative; margin-bottom: 12px;">
-        <div style="height: 200px; border: 1.5px dashed var(--ink); border-radius: 10px; background: repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(42,38,34,0.06) 8px, rgba(42,38,34,0.06) 9px); display: flex; align-items: center; justify-content: center;">
-          <div class="sk-box fill-ink" style="width: 60px; height: 60px; border-radius: 30px; display: flex; align-items: center; justify-content: center;">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="1.6" stroke-linejoin="round"><path d="M7 4v16l13-8z"/></svg>
-          </div>
-        </div>
-        <div class="sk-mono" style="position: absolute; bottom: 8px; right: 10px; font-size: 10px; background: rgba(42,38,34,0.8); color: var(--paper); padding: 2px 6px; border-radius: 3px;">0:47</div>
-      </div>
-
-      <p class="card-desc" style="font-size: 14px; line-height: 1.4; margin-bottom: 12px; color: var(--ink);">
-        "En el viaje al colegio hago 2 prácticas rápidas. Cuando llego, ya gané mi XP del día." 🚇
-      </p>
-
-      <div style="display: flex; gap: 12px;">
-        <div class="sk-mono" style="font-size: 10px; color: var(--mute);">⏱ 10 min/día</div>
-        <div class="sk-mono" style="font-size: 10px; color: var(--mute);">🔥 34 días</div>
-        <div class="sk-mono" style="font-size: 10px; color: var(--mute);">📚 +180 ejerc.</div>
-      </div>
-    </div>
-
-    <!-- VIDEO 2 — En el escritorio -->
-    <div class="card sk-box shadow" style="position: relative;">
-      <div style="position: absolute; top: -16px; right: -16px; transform: rotate(6deg);">
-        <span class="sk-annotation">ensayo completo ✏️</span>
-      </div>
-
-      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
-        <div class="sk-box fill-mint" style="width: 28px; height: 28px; border-radius: 14px; display: flex; align-items: center; justify-content: center;">
-          <span class="sk-h" style="font-size: 14px;">T</span>
-        </div>
-        <div>
-          <div class="sk-body" style="font-size: 13px; font-weight: 700;">Tomás, 18</div>
-          <div class="sk-mono" style="font-size: 10px; color: var(--mute);">Casa · 19:30 PM</div>
-        </div>
-        <div style="flex: 1;"></div>
-        <span class="sk-badge" style="background: var(--paper); border: 1px solid var(--ink);">💻 Escritorio</span>
-      </div>
-
-      <!-- Video placeholder -->
-      <div style="position: relative; margin-bottom: 12px;">
-        <div style="height: 200px; border: 1.5px dashed var(--ink); border-radius: 10px; background: repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(42,38,34,0.06) 8px, rgba(42,38,34,0.06) 9px); display: flex; align-items: center; justify-content: center;">
-          <div class="sk-box fill-ink" style="width: 60px; height: 60px; border-radius: 30px; display: flex; align-items: center; justify-content: center;">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="1.6" stroke-linejoin="round"><path d="M7 4v16l13-8z"/></svg>
-          </div>
-        </div>
-        <div class="sk-mono" style="position: absolute; bottom: 8px; right: 10px; font-size: 10px; background: rgba(42,38,34,0.8); color: var(--paper); padding: 2px 6px; border-radius: 3px;">1:12</div>
-      </div>
-
-      <p class="card-desc" style="font-size: 14px; line-height: 1.4; margin-bottom: 12px; color: var(--ink);">
-        "Después de clases me hago un ensayo DEMRE cronometrado. El feedback paso a paso me salvó." ✏️
-      </p>
-
-      <div style="display: flex; gap: 12px;">
-        <div class="sk-mono" style="font-size: 10px; color: var(--mute);">⏱ 2h/sesión</div>
-        <div class="sk-mono" style="font-size: 10px; color: var(--mute);">📈 65 → 82%</div>
-        <div class="sk-mono" style="font-size: 10px; color: var(--mute);">🏆 Nivel 7</div>
-      </div>
-    </div>
-
-  </div>
 
 </div>
 
