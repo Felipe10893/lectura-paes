@@ -31,10 +31,13 @@
     background: var(--paper);
     font-family: 'Kalam', cursive;
     color: var(--ink);
-    min-height: 100vh;
+    min-height: auto;
     padding: 0;
-    overflow-x: hidden;
+    overflow: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
+  body::-webkit-scrollbar { display: none; }
 
   /* ─────────────────────────────────────────────────────────────── */
   /* TYPOGRAPHY HELPERS                                              */
@@ -207,7 +210,7 @@
   .container {
     max-width: 1100px;
     margin: 0 auto;
-    padding: 0 32px 64px;
+    padding: 0 32px 8px;
   }
 
   /* ─────────────────────────────────────────────────────────────── */
@@ -219,7 +222,7 @@
     grid-template-columns: 1.2fr 1fr;
     gap: 24px;
     align-items: center;
-    padding: 16px 0 16px;
+    padding: 8px 0 8px;
   }
 
   .hero-title {
@@ -342,7 +345,7 @@
     font-family: 'Kalam', cursive;
     font-size: 15px;
     color: var(--ink2);
-    margin-bottom: 24px;
+    margin-bottom: 14px;
   }
 
   /* ─────────────────────────────────────────────────────────────── */
@@ -353,17 +356,17 @@
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
     gap: 18px;
-    margin-bottom: 36px;
+    margin-bottom: 0px;
   }
 
   .card {
     border: 1.8px solid var(--ink);
     border-radius: 12px;
-    padding: 24px;
+    padding: 18px 24px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    min-height: 260px;
+    gap: 10px;
+    min-height: 220px;
     transition: transform 0.15s, box-shadow 0.15s;
     background: var(--paper);
   }
@@ -511,7 +514,7 @@
   /* ─────────────────────────────────────────────────────────────── */
   
   .greeting-bar {
-    padding: 16px 0 0;
+    padding: 6px 0 0;
     font-family: 'Architects Daughter', cursive;
     font-size: 13px;
     color: var(--mute);
@@ -555,7 +558,7 @@
     </div>
   </div>
 
-  <hr class="sk-divider" style="margin-bottom: 40px;"/>
+  <hr class="sk-divider" style="margin-bottom: 12px;"/>
 
   <!-- 3 MAIN MODE CARDS -->
   <div class="section-title">¿Qué quieres hacer hoy?</div>
@@ -772,19 +775,7 @@ window.addEventListener('message', function(e) {
   }
 });
 
-// 4. AUTO-RESIZE: reportar altura real a Streamlit
-function reportHeight() {
-  const h = document.documentElement.scrollHeight || document.body.scrollHeight;
-  window.parent.postMessage({
-    isStreamlitMessage: true,
-    type: 'streamlit:setFrameHeight',
-    height: h
-  }, '*');
-}
-window.addEventListener('load', function() {
-  reportHeight();
-  setTimeout(reportHeight, 300);
-});
+// 4. No auto-resize — altura fija controlada desde Python
 </script>
 
 </body>

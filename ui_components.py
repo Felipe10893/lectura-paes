@@ -700,6 +700,35 @@ function doNav(){{
 def render_interfaz_principal():
     from pathlib import Path
 
+    # Fondo igual al iframe para que cualquier gap sea invisible
+    st.markdown("""
+    <style>
+    [data-testid="stApp"] {
+        background: #fdfcf7 !important;
+        background-attachment: unset !important;
+    }
+    div.block-container,
+    div[data-testid="stAppViewBlockContainer"],
+    div[data-testid="block-container"],
+    [data-testid="stMainBlockContainer"],
+    [data-testid="stMain"],
+    section.main > div {
+        padding-bottom: 0 !important;
+        margin-bottom: 0 !important;
+    }
+    /* Eliminar el footer y spacer de Streamlit */
+    footer, [data-testid="stDecoration"],
+    [data-testid="stBottom"], .stApp > footer,
+    div[data-testid="stVerticalBlock"] > div:last-child:empty {
+        display: none !important;
+        height: 0 !important;
+        min-height: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
     # Ocultar botones proxy ANTES de que aparezcan en pantalla
     components.html("""<script>
 (function(){
@@ -783,7 +812,7 @@ def render_interfaz_principal():
                     f'<script type="text/babel" src="{jsx_file}"></script>',
                     f'<script type="text/babel">{jsx_content}</script>'
                 )
-        components.html(html_content, height=950, scrolling=False)
+        components.html(html_content, height=840, scrolling=False)
 
     # ------------------------------------------------------------------
     # OYENTE: recibe postMessage del wireframe → clickea botón proxy
