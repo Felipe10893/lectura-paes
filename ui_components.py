@@ -966,19 +966,27 @@ def render_ensayos_demre():
 
         st.markdown("<hr style='border-top:1px dashed var(--card-border);margin:10px 0 20px 0;'>", unsafe_allow_html=True)
 
-        tab_labels = [f"Texto {k}" for k in sorted(textos.keys(), key=lambda x: int(x) if x.isdigit() else x)]
+        sorted_keys = sorted(textos.keys(), key=lambda x: int(x) if x.isdigit() else x)
+        total_lecturas = len(sorted_keys)
+        tab_labels = [f"Lectura {k}" for k in sorted_keys]
         tabs = st.tabs(tab_labels) if tab_labels else []
 
-        for tab_obj, t_key in zip(tabs, sorted(textos.keys(), key=lambda x: int(x) if x.isdigit() else x)):
+        for tab_idx, (tab_obj, t_key) in enumerate(zip(tabs, sorted_keys)):
             t_data = textos[t_key]
             pregs_texto = [p for p in preguntas if str(p.get("texto_id")) == str(t_key)]
+            num_pagina = tab_idx + 1
 
             with tab_obj:
                 col_texto, col_preguntas = st.columns([1.2, 1], gap="large")
 
                 with col_texto:
                     st.markdown(
-                        f"<h3 style='margin-bottom:16px;'>{t_data.get('titulo', f'Texto {t_key}')}</h3>",
+                        f"<div style='display:flex; align-items:center; gap:10px; margin-bottom:12px;'>"
+                        f"<span style='background:#EFF6FF; color:#1D4ED8; border:1px solid #BFDBFE; "
+                        f"border-radius:20px; padding:3px 12px; font-size:11px; font-weight:800; "
+                        f"letter-spacing:0.5px;'>LECTURA {num_pagina} DE {total_lecturas}</span>"
+                        f"</div>"
+                        f"<h3 style='margin:0 0 16px 0;'>{t_data.get('titulo', f'Texto {t_key}')}</h3>",
                         unsafe_allow_html=True,
                     )
                     st.markdown(
