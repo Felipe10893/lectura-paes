@@ -783,7 +783,7 @@ def render_interfaz_principal():
                     f'<script type="text/babel" src="{jsx_file}"></script>',
                     f'<script type="text/babel">{jsx_content}</script>'
                 )
-        components.html(html_content, height=2200, scrolling=True)
+        components.html(html_content, height=950, scrolling=False)
 
     # ------------------------------------------------------------------
     # OYENTE: recibe postMessage del wireframe → clickea botón proxy
