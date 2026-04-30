@@ -703,18 +703,40 @@ def render_interfaz_principal():
     # Fondo igual al iframe para que cualquier gap sea invisible
     st.markdown("""
     <style>
-    [data-testid="stApp"] {
-        background: #fdfcf7 !important;
-        background-attachment: unset !important;
+    /* Espacio superior: en el padre que el JS no resetea */
+    [data-testid="stAppViewContainer"] {
+        padding-top: 16px !important;
     }
+    /* Caja blanca principal — reducida para ver celeste en los 4 lados */
     div.block-container,
-    div[data-testid="stAppViewBlockContainer"],
-    div[data-testid="block-container"],
-    [data-testid="stMainBlockContainer"],
+    div[data-testid="block-container"] {
+        background:    #fdfcf7           !important;
+        border-radius: 20px              !important;
+        overflow:      hidden            !important;
+        padding-bottom: 14px             !important;
+        margin-bottom: 16px              !important;
+        margin-left:   auto              !important;
+        margin-right:  auto              !important;
+        width:         calc(100% - 32px) !important;
+        max-width:     calc(100% - 32px) !important;
+    }
+    /* Contenedores padre: transparentes para que las esquinas redondeadas sean visibles */
     [data-testid="stMain"],
+    [data-testid="stMainBlockContainer"],
+    [data-testid="stAppViewBlockContainer"],
+    section.main,
     section.main > div {
+        background:     transparent !important;
         padding-bottom: 0 !important;
-        margin-bottom: 0 !important;
+        margin-bottom:  0 !important;
+    }
+    /* Iframes: sin margen y con esquinas redondeadas para que respeten el recorte */
+    iframe {
+        display:       block  !important;
+        margin:        0      !important;
+        padding:       0      !important;
+        border-radius: 20px   !important;
+        overflow:      hidden !important;
     }
     /* Eliminar el footer y spacer de Streamlit */
     footer, [data-testid="stDecoration"],
@@ -812,7 +834,7 @@ def render_interfaz_principal():
                     f'<script type="text/babel" src="{jsx_file}"></script>',
                     f'<script type="text/babel">{jsx_content}</script>'
                 )
-        components.html(html_content, height=840, scrolling=False)
+        components.html(html_content, height=760, scrolling=False)
 
     # ------------------------------------------------------------------
     # OYENTE: recibe postMessage del wireframe → clickea botón proxy
@@ -949,26 +971,43 @@ def render_interfaz_principal():
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap" rel="stylesheet">
 <style>
   *,*::before,*::after{{box-sizing:border-box;margin:0;padding:0}}
-  html,body{{width:100%;overflow:hidden;background:#fdfcf7}}
+  html,body{{
+    width:100%;height:100%;
+    overflow:hidden;
+    background:#fdfcf7;
+    display:flex;
+    align-items:center;
+  }}
+
+  /* Caja visible con los 4 lados y fondo alrededor — centrada */
+  .uni-box{{
+    width:calc(100% - 48px);
+    margin:0 auto;
+    border:1.5px solid rgba(0,0,0,0.13);
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:0 1px 5px rgba(0,0,0,0.07);
+    background:#fdfcf7;
+  }}
 
   .uni-strip{{
     width:100%;
     background:#fdfcf7;
-    border-top:1px solid rgba(0,0,0,0.08);
-    padding:14px 0;
+    padding:12px 0;
     overflow:hidden;
+    pointer-events:none;
     -webkit-mask-image:linear-gradient(
       to right,
       transparent 0px,
-      #000 150px,
-      #000 calc(100% - 150px),
+      #000 120px,
+      #000 calc(100% - 120px),
       transparent 100%
     );
     mask-image:linear-gradient(
       to right,
       transparent 0px,
-      #000 150px,
-      #000 calc(100% - 150px),
+      #000 120px,
+      #000 calc(100% - 120px),
       transparent 100%
     );
   }}
@@ -981,8 +1020,6 @@ def render_interfaz_principal():
     animation:ticker 40s linear infinite;
     will-change:transform;
   }}
-  .uni-track:hover{{animation-play-state:paused}}
-
   @keyframes ticker{{
     from{{ transform:translate3d(0,0,0) }}
     to  {{ transform:translate3d(-50%,0,0) }}
@@ -997,9 +1034,8 @@ def render_interfaz_principal():
     cursor:default;
     user-select:none;
     display:inline-block;
-    transition:transform 0.3s ease;
+    pointer-events:none;
   }}
-  .uni-name:hover{{transform:scale(1.05)}}
 
   .sep{{
     font-size:14px;
@@ -1010,28 +1046,30 @@ def render_interfaz_principal():
   }}
 
   @media(max-width:768px){{
-    .uni-strip{{padding:10px 0}}
+    .uni-box{{width:calc(100% - 32px);margin:8px auto}}
     .uni-track{{gap:28px;animation-duration:26s}}
     .uni-name{{font-size:11px}}
     .uni-strip{{
       -webkit-mask-image:linear-gradient(
-        to right,transparent 0px,#000 80px,#000 calc(100% - 80px),transparent 100%
+        to right,transparent 0px,#000 60px,#000 calc(100% - 60px),transparent 100%
       );
       mask-image:linear-gradient(
-        to right,transparent 0px,#000 80px,#000 calc(100% - 80px),transparent 100%
+        to right,transparent 0px,#000 60px,#000 calc(100% - 60px),transparent 100%
       );
     }}
   }}
 </style>
 </head>
 <body>
-<div class="uni-strip">
-  <div class="uni-track">
-    {_track}
+<div class="uni-box">
+  <div class="uni-strip">
+    <div class="uni-track">
+      {_track}
+    </div>
   </div>
 </div>
 </body></html>
-""", height=54)
+""", height=74)
 
 
 # ==============================================================================
