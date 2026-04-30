@@ -910,6 +910,128 @@ def render_interfaz_principal():
 </script>
 """, height=0)
 
+    # ------------------------------------------------------------------
+    # FRANJA DE UNIVERSIDADES — carrusel de texto con colores corporativos
+    # ------------------------------------------------------------------
+    _UNIS = [
+        ("Universidad de Chile",                   "#00468B"),
+        ("Pontificia Universidad Católica",         "#003865"),
+        ("USACH",                                   "#EF7B10"),
+        ("Universidad de los Andes",                "#004165"),
+        ("Universidad Adolfo Ibáñez",               "#00417D"),
+        ("Universidad Diego Portales",              "#000000"),
+        ("Universidad Austral de Chile",            "#006738"),
+        ("Universidad Andrés Bello",                "#E30613"),
+        ("Universidad de Valparaíso",               "#003767"),
+        ("Universidad de Talca",                    "#003865"),
+        ("Universidad de La Frontera",              "#006CB7"),
+        ("Universidad de La Serena",                "#00549F"),
+        ("Universidad Católica de Temuco",          "#003057"),
+        ("Universidad Tecnológica Metropolitana",   "#00549F"),
+        ("Universidad de Magallanes",               "#006847"),
+        ("Universidad Santo Tomás",                 "#00824D"),
+        ("Universidad de Concepción",               "#003767"),
+        ("Federico Santa María",                    "#003057"),
+    ]
+
+    def _item(nombre, color):
+        return (
+            f'<span class="uni-name" style="color:{color}">{nombre}</span>'
+            f'<span class="sep" aria-hidden="true">·</span>'
+        )
+
+    _group = "".join(_item(n, c) for n, c in _UNIS)
+    _track  = _group + _group   # duplicado — loop sin salto
+
+    components.html(f"""<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{{box-sizing:border-box;margin:0;padding:0}}
+  html,body{{width:100%;overflow:hidden;background:#fdfcf7}}
+
+  .uni-strip{{
+    width:100%;
+    background:#fdfcf7;
+    border-top:1px solid rgba(0,0,0,0.08);
+    padding:14px 0;
+    overflow:hidden;
+    -webkit-mask-image:linear-gradient(
+      to right,
+      transparent 0px,
+      #000 150px,
+      #000 calc(100% - 150px),
+      transparent 100%
+    );
+    mask-image:linear-gradient(
+      to right,
+      transparent 0px,
+      #000 150px,
+      #000 calc(100% - 150px),
+      transparent 100%
+    );
+  }}
+
+  .uni-track{{
+    display:flex;
+    align-items:center;
+    gap:48px;
+    width:max-content;
+    animation:ticker 40s linear infinite;
+    will-change:transform;
+  }}
+  .uni-track:hover{{animation-play-state:paused}}
+
+  @keyframes ticker{{
+    from{{ transform:translate3d(0,0,0) }}
+    to  {{ transform:translate3d(-50%,0,0) }}
+  }}
+
+  .uni-name{{
+    font-family:'Inter',system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+    font-weight:700;
+    font-size:13px;
+    white-space:nowrap;
+    flex-shrink:0;
+    cursor:default;
+    user-select:none;
+    display:inline-block;
+    transition:transform 0.3s ease;
+  }}
+  .uni-name:hover{{transform:scale(1.05)}}
+
+  .sep{{
+    font-size:14px;
+    color:rgba(0,0,0,0.18);
+    flex-shrink:0;
+    user-select:none;
+    font-weight:400;
+  }}
+
+  @media(max-width:768px){{
+    .uni-strip{{padding:10px 0}}
+    .uni-track{{gap:28px;animation-duration:26s}}
+    .uni-name{{font-size:11px}}
+    .uni-strip{{
+      -webkit-mask-image:linear-gradient(
+        to right,transparent 0px,#000 80px,#000 calc(100% - 80px),transparent 100%
+      );
+      mask-image:linear-gradient(
+        to right,transparent 0px,#000 80px,#000 calc(100% - 80px),transparent 100%
+      );
+    }}
+  }}
+</style>
+</head>
+<body>
+<div class="uni-strip">
+  <div class="uni-track">
+    {_track}
+  </div>
+</div>
+</body></html>
+""", height=54)
 
 
 # ==============================================================================
